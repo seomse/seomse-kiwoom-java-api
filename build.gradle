@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+}
+
+group 'com.seomse.stock.kiwoom'
+version '0.1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.seomse.crawling:seomse-crawling:0.7.5'
+    implementation 'com.seomse.commons:seomse-commons:1.1.9'
+    implementation 'com.seomse.jdbc:seomse-jdbc:0.9.3'
+
+
+    // html parser jsoup
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
+
+    //jdbc
+    implementation group: 'com.oracle.ojdbc', name: 'ojdbc8', version: '19.3.0.0'
+
+
+    //임시테스트용
+//    implementation 'org.reflections:reflections:0.9.10'
+//    implementation 'org.json:json:20200518'
+//    implementation 'com.seomse.api:seomse-api:1.0.5'
+//    implementation 'com.seomse.system:seomse-system:0.9.7'
+    implementation fileTree (dir: 'dependencies', include: ['/**/*.jar'])
+}
