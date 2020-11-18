@@ -20,14 +20,20 @@ import com.seomse.jdbc.annotation.Table;
  */
 
 @Table(name="T_CRAWLING_KIWOOM_TR")
-public class KiwoomCrawlDailyCheckNo {
+public class KiwoomCrawlCheckNo {
     @PrimaryKey(seq = 1)
     private String ITEM_CD;
+    @PrimaryKey(seq = 2)
+    private String CRAWL_TP;
+    @PrimaryKey(seq = 1)
+    private String TIME_CD;
     private String YMD_LAST;
     private String YMD_FIRST;
     private Long CNT_DATA;
     @DateTime
-    private Long DT_REG_FST = System.currentTimeMillis();
+    private Long REG_DT = System.currentTimeMillis();
+    @DateTime
+    private Long UPT_DT = System.currentTimeMillis();
 
     public String getITEM_CD() {
         return ITEM_CD;
@@ -35,6 +41,22 @@ public class KiwoomCrawlDailyCheckNo {
 
     public void setITEM_CD(String ITEM_CD) {
         this.ITEM_CD = ITEM_CD;
+    }
+
+    public String getCRAWL_TP() {
+        return CRAWL_TP;
+    }
+
+    public void setCRAWL_TP(String CRAWL_TP) {
+        this.CRAWL_TP = CRAWL_TP;
+    }
+
+    public String getTIME_CD() {
+        return TIME_CD;
+    }
+
+    public void setTIME_CD(String TIME_CD) {
+        this.TIME_CD = TIME_CD;
     }
 
     public String getYMD_LAST() {
@@ -61,11 +83,19 @@ public class KiwoomCrawlDailyCheckNo {
         this.CNT_DATA = CNT_DATA;
     }
 
-    public Long getDT_REG_FST() {
-        return DT_REG_FST;
+    public Long getREG_DT() {
+        return REG_DT;
     }
 
-    public void setDT_REG_FST(Long DT_REG_FST) {
-        this.DT_REG_FST = DT_REG_FST;
+    public void setREG_DT(Long REG_DT) {
+        this.REG_DT = REG_DT;
+    }
+
+    public Long getUPT_DT() {
+        return UPT_DT;
+    }
+
+    public void setUPT_DT(Long UPT_DT) {
+        this.UPT_DT = UPT_DT;
     }
 }

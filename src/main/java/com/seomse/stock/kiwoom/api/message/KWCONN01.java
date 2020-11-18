@@ -2,7 +2,6 @@ package com.seomse.stock.kiwoom.api.message;
 
 import com.seomse.api.ApiMessage;
 import com.seomse.commons.utils.ExceptionUtil;
-import com.seomse.stock.crawling.api.ItemKrxUpdate;
 import com.seomse.system.commons.SystemMessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 public class KWCONN01 extends ApiMessage {
 
-    private static final Logger logger = LoggerFactory.getLogger(ItemKrxUpdate.class);
+    private static final Logger logger = LoggerFactory.getLogger(KWCONN01.class);
 
     @Override
     public void receive(String message) {
