@@ -4,11 +4,15 @@ import com.seomse.api.server.ApiRequestConnectHandler;
 import com.seomse.api.server.ApiRequestServer;
 import com.seomse.api.server.ApiServer;
 import com.seomse.commons.service.Service;
+import com.seomse.commons.utils.FileUtil;
 import com.seomse.commons.utils.date.DateUtil;
 import com.seomse.stock.kiwoom.api.KiwoomClientManager;
 import com.seomse.stock.kiwoom.data.KiwoomDateCrawler;
+import com.seomse.stock.kiwoom.process.KiwoomProcessMonitorService;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -65,10 +69,23 @@ public class KiwoomApiServer{
     }
 
     public static void main(String [] args){
-        KiwoomApiServer apiServer = new KiwoomApiServer(33333,33334);
-        //ApiServer apiServer = new ApiServer(33333,"com.seomse.stock");
+
+        String fileContents = FileUtil.getFileContents(new File("config/kiwoom_config"), "UTF-8");
+        fileContents = fileContents.replace("\\\\","\\");
+        fileContents = fileContents.replace("\\","\\\\");
+        JSONObject jsonObject = new JSONObject(fileContents);
+        int receivePort = jsonObject.getInt("api_receive_port") ;
+        int sendPort = jsonObject.getInt("api_send_port") ;
+
+
+        KiwoomProcessMonitorService monitorService = new KiwoomProcessMonitorService();
+        monitorService.setSleepTime(60000L);
+        monitorService.setState(Service.State.START);
+        monitorService.start();
+
+        KiwoomApiServer apiServer = new KiwoomApiServer(receivePort,sendPort);
         apiServer.start();
-        //apiServer.start();
-        //KiwoomClientManager.getInstance().clientListCheckStart();
+
+
     }
 }
