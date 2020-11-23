@@ -45,8 +45,6 @@ public class KiwoomProcessMonitorService extends Service {
     public void work() {
 
 
-
-
         String nowYmd = DateUtil.getDateYmd(System.currentTimeMillis(),"yyyyMMdd");
         String hh = DateUtil.getDateYmd(System.currentTimeMillis(),"HH");
         int mm = Integer.parseInt(DateUtil.getDateYmd(System.currentTimeMillis(),"mm"));
@@ -77,7 +75,13 @@ public class KiwoomProcessMonitorService extends Service {
                         return;
                     }
                 }
+                logger.info("runProcess");
                 ProcessRunner.runProcess(apiProcessPath,false);
+                try {
+                    Thread.sleep(10000L);
+                } catch (InterruptedException e) {
+                    logger.error(ExceptionUtil.getStackTrace(e));
+                }
             }).start();
         }catch (IOException e) {}
     }
@@ -109,10 +113,11 @@ public class KiwoomProcessMonitorService extends Service {
             process.waitFor();
 
         }
-        catch (IOException e) {}
-        catch (InterruptedException e) {}
+        catch (IOException | InterruptedException e) {
+            logger.error(ExceptionUtil.getStackTrace(e));
+        }
         lastExecuteDate = nowYmd;
-        System.out.println("Done");
+
     }
     public static void main(String [] args){
 //        Service service = new KiwoomProcessMonitorService();

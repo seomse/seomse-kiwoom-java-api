@@ -2,8 +2,8 @@ package com.seomse.stock.kiwoom.api.callback.control;
 
 import com.seomse.commons.utils.date.DateUtil;
 import com.seomse.jdbc.naming.JdbcNaming;
-import com.seomse.stock.kiwoom.data.no.KiwoomCrawlCheckNo;
-import com.seomse.stock.kiwoom.data.no.KiwoomCrawlDailyCheckNo;
+import com.seomse.stock.kiwoom.api.KiwoomApiLock;
+import com.seomse.stock.kiwoom.data.no.KiwoomCrawlStatusNo;
 import com.seomse.stock.kiwoom.data.no.KiwoomCrawlDailyPriceNo;
 
 import java.util.ArrayList;
@@ -28,15 +28,17 @@ public class OPT10013 extends DefaultCallbackController{
     private String itemCode = null;
     private static final String OPT_CODE = "OPT10013";
     private static final String DATE_TYPE = "D";
-    public OPT10013(String param, String message) {
-        super(param,message);
+    public OPT10013(String param, String message, String callbackId) {
+        super(param,message,callbackId);
         itemCode = param;
+
     }
 
     @Override
     public void disposeMessage() {
+        KiwoomApiLock.getInstance().putCallbackData(callbackId,message);
         String[] messageArr = message.split("\n",-1);
-        KiwoomCrawlCheckNo checkNo = getCheckNo(param);
+        KiwoomCrawlStatusNo checkNo = getCheckNo(param);
         String lastYmd = checkNo.getYMD_LAST();
         List<KiwoomCrawlDailyPriceNo> insertList = new ArrayList<>();
         for(int i=messageArr.length-1;i>=0;i--){
@@ -110,10 +112,10 @@ public class OPT10013 extends DefaultCallbackController{
         return priceNo;
     }
 
-    private KiwoomCrawlCheckNo getCheckNo(String itemCode) {
-        KiwoomCrawlCheckNo no = JdbcNaming.getObj(KiwoomCrawlCheckNo.class , "ITEM_CD='"+itemCode+"' AND TIME_CD='"+DATE_TYPE+"' AND CRAWL_TP='"+OPT_CODE+"'");
+    private KiwoomCrawlStatusNo getCheckNo(String itemCode) {
+        KiwoomCrawlStatusNo no = JdbcNaming.getObj(KiwoomCrawlStatusNo.class , "ITEM_CD='"+itemCode+"' AND TIME_CD='"+DATE_TYPE+"' AND CRAWL_TP='"+OPT_CODE+"'");
         if(no == null){
-            no = new KiwoomCrawlCheckNo();
+            no = new KiwoomCrawlStatusNo();
             no.setITEM_CD(itemCode);
             no.setCRAWL_TP(OPT_CODE);
             no.setTIME_CD(DATE_TYPE);

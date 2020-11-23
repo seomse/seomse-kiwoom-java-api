@@ -20,16 +20,16 @@ import com.seomse.jdbc.annotation.Table;
  */
 
 @Table(name="T_CRAWLING_KIWOOM_TR")
-public class KiwoomCrawlCheckNo {
+public class KiwoomCrawlStatusNo {
     @PrimaryKey(seq = 1)
     private String ITEM_CD;
     @PrimaryKey(seq = 2)
     private String CRAWL_TP;
-    @PrimaryKey(seq = 1)
+    @PrimaryKey(seq = 3)
     private String TIME_CD;
-    private String YMD_LAST;
-    private String YMD_FIRST;
-    private Long CNT_DATA;
+    private String YMD_LAST="19000101";
+    private String YMD_FIRST="29991231";
+    private Integer DATA_CNT;
     @DateTime
     private Long REG_DT = System.currentTimeMillis();
     @DateTime
@@ -75,12 +75,12 @@ public class KiwoomCrawlCheckNo {
         this.YMD_FIRST = YMD_FIRST;
     }
 
-    public Long getCNT_DATA() {
-        return CNT_DATA;
+    public Integer getDATA_CNT() {
+        return DATA_CNT;
     }
 
-    public void setCNT_DATA(Long CNT_DATA) {
-        this.CNT_DATA = CNT_DATA;
+    public void setDATA_CNT(Integer DATA_CNT) {
+        this.DATA_CNT = DATA_CNT;
     }
 
     public Long getREG_DT() {

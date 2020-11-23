@@ -1,6 +1,7 @@
 package com.seomse.stock.kiwoom.api;
 
 import com.seomse.api.ApiRequest;
+import com.seomse.commons.utils.ExceptionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +82,28 @@ public class KiwoomClientManager {
         KiwoomClient kiwoomClient = getClient();
         final ApiRequest request = kiwoomClient.getRequest();
         request.sendMessage(makeCodeParam("KWTR0001","OPT10086"),makeDataParam(stockCode,date,"1"));
+    }
+
+    public String getDateCreditData(String stockCode , String date){
+        KiwoomClient kiwoomClient = getClient();
+        final ApiRequest request = kiwoomClient.getRequest();
+        String callbackId = UUID.randomUUID().toString();
+        KiwoomApiLock.getInstance().putCallbackId(callbackId);
+
+        request.sendMessage(makeCodeParam("KWTR0001","OPT10015")
+                ,makeDataParam(stockCode,date,"1"));
+
+        while(true){
+            try {
+                Thread.sleep(100L);
+                String callbackData = KiwoomApiLock.getInstance().getCallbackData(callbackId);
+                if(callbackData != null){
+                    return callbackData;
+                }
+            } catch (InterruptedException e) {
+                logger.error(ExceptionUtil.getStackTrace(e));
+            }
+        }
     }
 
     public void getMinuteData(String stockCode,String date){

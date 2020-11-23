@@ -25,8 +25,8 @@ import java.util.List;
 
 public class OPT10086 extends DefaultCallbackController{
     private String itemCode = null;
-    public OPT10086(String param, String message) {
-        super(param,message);
+    public OPT10086(String param, String message, String callbackId) {
+        super(param,message,callbackId);
         itemCode = param;
     }
 

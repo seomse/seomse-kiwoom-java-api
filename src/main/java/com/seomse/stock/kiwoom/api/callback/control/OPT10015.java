@@ -22,8 +22,8 @@ import com.seomse.stock.kiwoom.data.no.KiwoomCrawlDailyPriceNo;
 
 public class OPT10015 extends DefaultCallbackController{
     private String itemCode = null;
-    public OPT10015(String param, String message) {
-        super(param,message);
+    public OPT10015(String param, String message,String callbackId) {
+        super(param,message,callbackId);
         itemCode = param;
     }
 
