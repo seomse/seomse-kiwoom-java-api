@@ -16,37 +16,40 @@
 
 package com.seomse.stock.kiwoom.data;
 
+import com.seomse.commons.service.Service;
 import com.seomse.commons.utils.ExceptionUtil;
+import com.seomse.commons.utils.FileUtil;
 import com.seomse.commons.utils.time.DateUtil;
-import com.seomse.crawling.CrawlingManager;
-import com.seomse.crawling.CrawlingServer;
-import com.seomse.crawling.core.http.HttpOptionDataKey;
 import com.seomse.jdbc.JdbcQuery;
 import com.seomse.jdbc.naming.JdbcNaming;
+import com.seomse.stock.kiwoom.KiwoomApiServer;
 import com.seomse.stock.kiwoom.api.KiwoomClientManager;
 import com.seomse.stock.kiwoom.data.no.KiwoomCrawlDailyCreditNo;
 import com.seomse.stock.kiwoom.data.no.KiwoomCrawlStatusNo;
-import org.json.JSONArray;
+import com.seomse.stock.kiwoom.process.KiwoomProcess;
+import com.seomse.stock.kiwoom.process.KiwoomProcessMonitorService;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Random;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class KiwoomDateCreditCrawler {
     private static final Logger logger = getLogger(KiwoomDateCreditCrawler.class);
 
-    private static String DATE_YMD = "yyyyMMdd";
-    private static final String CREDIT_TYPE= "CREDIT";
+    private String DATE_YMD = "yyyyMMdd";
+    private static final String CRAWL_TYPE = "CREDIT";
+    private static final String DATA_SEPARATOR = "\\|";
+    private static final Long CRAWL_SLEEP_TIME = 4000L;
 
     /**
      * 마지막 응답 결과 저장용 객체
      */
-    private static class CrawlResponse{
+    private class CrawlResponse{
         boolean isSuccess;
         String lastDate;
         String lastTime;
@@ -82,12 +85,12 @@ public class KiwoomDateCreditCrawler {
 
         String timeCode = "D";
         /* 종목의 현재 수집 상태값 얻기 */
-        KiwoomCrawlStatusNo statusNo = JdbcNaming.getObj(KiwoomCrawlStatusNo.class,"ITEM_CD='"+itemCode+"' AND TIME_CD='"+timeCode+"' AND CRAWL_TP='"+CREDIT_TYPE+"'");
+        KiwoomCrawlStatusNo statusNo = JdbcNaming.getObj(KiwoomCrawlStatusNo.class,"ITEM_CD='"+itemCode+"' AND TIME_CD='"+timeCode+"' AND CRAWL_TP='"+ CRAWL_TYPE +"'");
         if(statusNo == null){
             statusNo = new KiwoomCrawlStatusNo();
             statusNo.setITEM_CD(itemCode);
             statusNo.setTIME_CD(timeCode);
-            statusNo.setCRAWL_TP(CREDIT_TYPE);
+            statusNo.setCRAWL_TP(CRAWL_TYPE);
         }
         logger.debug("""
                 ITEM CODE [%s] STARTED! LAST CRAWL [%s]
@@ -100,7 +103,6 @@ public class KiwoomDateCreditCrawler {
             nowDate = DateUtil.addDateYmd(nowDate, Calendar.DAY_OF_MONTH , -1 , "yyyyMMdd");
         }
         String startDate = nowDate;
-        String startTime = "235959";
 
         List<KiwoomCrawlDailyCreditNo> allInsertChartNoList = new ArrayList<>();
         while(true){
@@ -109,8 +111,7 @@ public class KiwoomDateCreditCrawler {
             if( response.isSuccess() ){
 
                 startDate = response.getLastDate();
-                startTime = response.getLastTime();
-
+                startDate = DateUtil.addDateYmd(startDate,Calendar.DAY_OF_YEAR,-1,"yyyyMMdd");
                 List<KiwoomCrawlDailyCreditNo> chartNoList = response.getChartNoList();
                 List<KiwoomCrawlDailyCreditNo> insertChartNoList = getInsertChartNoList(chartNoList,statusNo);
 
@@ -149,7 +150,7 @@ public class KiwoomDateCreditCrawler {
      * @param statusNo 수집상태 NO
      * @return 적재 목록
      */
-    private static List<KiwoomCrawlDailyCreditNo> getInsertChartNoList(List<KiwoomCrawlDailyCreditNo> chartNoList, KiwoomCrawlStatusNo statusNo) {
+    private List<KiwoomCrawlDailyCreditNo> getInsertChartNoList(List<KiwoomCrawlDailyCreditNo> chartNoList, KiwoomCrawlStatusNo statusNo) {
         long statusFirst = DateUtil.getDateTime( statusNo.getYMD_FIRST(),DATE_YMD);
         long statusLast = DateUtil.getDateTime(statusNo.getYMD_LAST(),DATE_YMD);
 
@@ -171,7 +172,7 @@ public class KiwoomDateCreditCrawler {
      * @param chartNoList 차트데이터 NO 리스트
      * @param statusNo 수집상태 NO
      */
-    private static void insertOrUpdateStatusNo(List<KiwoomCrawlDailyCreditNo> chartNoList, KiwoomCrawlStatusNo statusNo) {
+    private void insertOrUpdateStatusNo(List<KiwoomCrawlDailyCreditNo> chartNoList, KiwoomCrawlStatusNo statusNo) {
         if(chartNoList.size() == 0){
             return ;
         }
@@ -205,83 +206,128 @@ public class KiwoomDateCreditCrawler {
      * @param startDate 시작일자
      * @return 수집결과
      */
-    private static CrawlResponse crawlItem(String itemCode, String startDate) {
+    private CrawlResponse crawlItem(String itemCode, String startDate) {
 
 
         CrawlResponse response = new CrawlResponse(false,"","");
+
+        String dateCreditAllData = KiwoomClientManager.getInstance().getDateCreditData(itemCode, startDate);
+        if(dateCreditAllData == null || dateCreditAllData.length() == 0 || dateCreditAllData.equals("FAIL")){
+            return response;
+        }
+
+        //20201112|-10750|5         |-250  |904389|598331|660025|2540150|25643|-61694|25.40  | 5.13
+        //   0    |  1   |      2   |  3   |   4  |5     |6     | 7     | 8   |  9   | 10    | 11
+        //일자    /현재가  /전일대비기호/전일대비/거래량 /신규   /상환   /잔고    /금액  /대비   /공여율  /잔고율
         /*
+        CREDIT_TOTAL_VOL	NUMBER	Yes		23	신용거래량
+        CREDIT_NEW_VOL	    NUMBER	Yes		24	신용신규량
+        CREDIT_REPAY_VOL	NUMBER	Yes		25	신용상환량
+        CREDIT_BALANCE_VOL	NUMBER	Yes		26	신용잔고량
+        CREDIT_PRC_VOL	    NUMBER	Yes		27	신용금액량
+        CREDIT_CHANGE_VOL	NUMBER	Yes		28	신용변동량
+        CREDIT_EXPOSURE_RT	NUMBER	Yes		29	신용공여율
+        CREDIT_BALANCE_RT	NUMBER	Yes		22	신용잔고율
+         */
+
+        String [] dateCreditDataArr = dateCreditAllData.split("\n");
+        String lastDate=null;
         List<KiwoomCrawlDailyCreditNo> chartNoList = new ArrayList<>();
-        String lastDate = "";
-        try {
-            String result = KiwoomClientManager.getInstance().getDateCreditData(itemCode,startDate);
 
+        for (int i = 0; i < dateCreditDataArr.length; i++) {
+            String dateCreditData = dateCreditDataArr[i];
+            String [] dateCreditArr = dateCreditData.split(DATA_SEPARATOR);
+            String date = dateCreditArr[0];
+            String creditVolumeStr = dateCreditArr[4];
+            String creditNewVolumeStr = dateCreditArr[5];
+            String creditRepayVolumeStr = dateCreditArr[6];
+            String creditBalanceVolumeStr = dateCreditArr[7];
+            String creditPriceVolumeStr = dateCreditArr[8];
+            String creditChangeVolumeStr = dateCreditArr[9];
+            String creditExposureRateStr = dateCreditArr[10];
+            String creditBalanceRateStr = dateCreditArr[11];
 
-            if (result != null) {
-                for(int i=0; i< resultJsonArr.length();i++){
-                    DaumCrawlChartNo chartNo = null ;
-                    switch (crawlType){
-                        case DAY_ITEM ->   chartNo = new DaumCrawlChartDayNo();
-                        case DAY_MARKET ->   chartNo = new DaumCrawlChartMarketDayNo();
-                        case FIVE_MINUTES_ETF ->  chartNo = new DaumCrawlChartETF5MNo();
-                        case FIVE_MINUTES_MARKET ->  chartNo = new DaumCrawlChartMarket5MNo();
-                        case FIVE_MINUTES_ITEM ->  chartNo = new DaumCrawlChart5MNo();
-                    }
+            long creditVolume = Long.parseLong(creditVolumeStr);
+            long creditNewVolume = Long.parseLong(creditNewVolumeStr);
+            long creditRepayVolume = Long.parseLong(creditRepayVolumeStr);
+            long creditBalanceVolume = Long.parseLong(creditBalanceVolumeStr);
+            long creditPriceVolume = Long.parseLong(creditPriceVolumeStr);
+            long creditChangeVolume = Long.parseLong(creditChangeVolumeStr);
+            double creditExposureRate = Double.parseDouble(creditExposureRateStr);
+            double creditBalanceRate = Double.parseDouble(creditBalanceRateStr);
 
-                    JSONObject resultDataJson = resultJsonArr.getJSONObject(i);
-                    //String date = resultDataJson.getString("date");
-
-                    String candleTime = resultDataJson.getString("candleTime");
-                    String dataDateYmd = candleTime.replace("-","").replace(" ","").replace(":","");
-                    dataDateYmd = dataDateYmd.substring(0,14);
-
-                    if(i == 0){
-                        lastDate = dataDateYmd.substring(0,8);
-                        lastTime = dataDateYmd.substring(8);
-                    }
-
-                    Double tradePrice = resultDataJson.getDouble("tradePrice");
-                    Double openingPrice = resultDataJson.getDouble("openingPrice");
-                    Double highPrice = resultDataJson.getDouble("highPrice");
-                    Double lowPrice = resultDataJson.getDouble("lowPrice");
-                    Long candleAccTradePrice = resultDataJson.getLong("candleAccTradePrice");
-                    Long candleAccTradeVolume = resultDataJson.getLong("candleAccTradeVolume");
-                    Long tradeTime = resultDataJson.getLong("tradeTime");
-                    Double change = null , changeRate = null, changePrice = null;
-                    try {
-                        change = resultDataJson.getDouble("change");
-                        changeRate = resultDataJson.getDouble("changeRate");
-                        changePrice = resultDataJson.getDouble("changePrice");
-                    } catch(JSONException e){
-                        // 데이터 미존재시 데이터 스킵
-                    }
-
-
-                    chartNo.setCode(itemCode);
-                    chartNo.setYmd(dataDateYmd.substring(0,12));
-                    chartNo.setOPEN_PRC(openingPrice);
-                    chartNo.setHIGH_PRC(highPrice);
-                    chartNo.setLOW_PRC(lowPrice);
-                    chartNo.setCLOSE_PRC(tradePrice);
-
-                    chartNo.setTRADE_VOL(candleAccTradeVolume);
-                    chartNo.setTRADE_PRC_VOL(candleAccTradePrice);
-                    chartNoList.add(chartNo);
-                }
-
+            KiwoomCrawlDailyCreditNo chartNo = new KiwoomCrawlDailyCreditNo();
+            chartNo.setITEM_CD(itemCode);
+            chartNo.setYMD(date);
+            if(i == dateCreditDataArr.length-1){
+                lastDate = date.substring(0,8);
             }
-        } catch(IllegalArgumentException e){
-            logger.error(ExceptionUtil.getStackTrace(e));
+            chartNo.setCREDIT_TOTAL_VOL(creditVolume);
+            chartNo.setCREDIT_NEW_VOL(creditNewVolume);
+            chartNo.setCREDIT_REPAY_VOL(creditRepayVolume);
+            chartNo.setCREDIT_BALANCE_VOL(creditBalanceVolume);
+            chartNo.setCREDIT_PRC_VOL(creditPriceVolume);
+            chartNo.setCREDIT_CHANGE_VOL(creditChangeVolume);
+            chartNo.setCREDIT_EXPOSURE_RT(creditExposureRate);
+            chartNo.setCREDIT_BALANCE_RT(creditBalanceRate);
+            chartNoList.add(chartNo);
         }
 
         if(chartNoList.size() > 0){
             response.setSuccess(true);
             response.setLastDate(lastDate);
-            response.setLastTime(lastTime);
             response.setChartNoList(chartNoList);
         }
-*/
+
+        try {
+            Thread.sleep(CRAWL_SLEEP_TIME);
+        } catch (InterruptedException e) {
+            logger.error(ExceptionUtil.getStackTrace(e));
+        }
         return response;
     }
 
+    public static void main(String [] args){
 
+        String fileContents = FileUtil.getFileContents(new File("config/kiwoom_config"), "UTF-8");
+        fileContents = fileContents.replace("\\\\","\\");
+        fileContents = fileContents.replace("\\","\\\\");
+        JSONObject jsonObject = new JSONObject(fileContents);
+        int receivePort = jsonObject.getInt("api_receive_port") ;
+        int sendPort = jsonObject.getInt("api_send_port") ;
+
+
+        KiwoomProcessMonitorService monitorService = new KiwoomProcessMonitorService();
+        monitorService.setSleepTime(60000L);
+        monitorService.setState(Service.State.START);
+        monitorService.start();
+
+        KiwoomApiServer apiServer = new KiwoomApiServer(receivePort,sendPort);
+        apiServer.start();
+
+        KiwoomProcess.checkProcess();
+        new Thread(() -> {
+            try {
+                Thread.sleep(10000L);
+            } catch (InterruptedException e) {
+                logger.error(ExceptionUtil.getStackTrace(e));
+            }
+
+            logger.info("item trade CREDIT start");
+            List<String> codeList = JdbcQuery.getStringList("SELECT ITEM_CD FROM T_STOCK_ITEM WHERE DELISTING_DT IS NULL");
+
+            int index = 0;
+            for(String code : codeList){
+                try {
+                    logger.debug("CREDIT code: " + code + " " + ++index + " " + codeList.size());
+
+                    new KiwoomDateCreditCrawler().updateSingle(code);
+                }catch(Exception e){
+                    logger.error(ExceptionUtil.getStackTrace(e));
+                }
+            }
+            logger.info("item trade CREDIT complete");
+
+        }).start();
+    }
 }

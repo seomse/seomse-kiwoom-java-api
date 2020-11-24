@@ -29,7 +29,7 @@ public class KiwoomCrawlStatusNo {
     private String TIME_CD;
     private String YMD_LAST="19000101";
     private String YMD_FIRST="29991231";
-    private Integer DATA_CNT;
+    private Integer DATA_CNT=0;
     @DateTime
     private Long REG_DT = System.currentTimeMillis();
     @DateTime

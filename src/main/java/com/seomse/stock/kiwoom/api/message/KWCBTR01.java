@@ -34,24 +34,24 @@ public class KWCBTR01 extends ApiMessage {
         try{
             String kiwoomApiCode = message.split(PARAM_SEPARATOR)[0];
             String result = message.substring(kiwoomApiCode.length()+1);
-            String param=null,data=null;
+            String callbackId=null,data=null;
             if(result.contains(PARAM_SEPARATOR)) {
                 try {
-                    param = result.substring(0, result.lastIndexOf(PARAM_SEPARATOR));
+                    callbackId = result.substring(0, result.lastIndexOf(PARAM_SEPARATOR));
                     data = result.substring(result.lastIndexOf(PARAM_SEPARATOR) + 1);
                 } catch(IndexOutOfBoundsException e){
                     logger.error(ExceptionUtil.getStackTrace(e));
-                    param = "";
+                    callbackId = "";
                     data = result;
                 }
             } else {
-                param = "";
+                callbackId = "";
                 data = result;
             }
-            logger.debug("CALLBACK Recieved : " + kiwoomApiCode + " data size :  "+data.split("\n").length);
+            logger.debug("CALLBACK Recieved : " + kiwoomApiCode + " data size :  "+data.split("\n").length + "("+callbackId+")");
             Class<?> callBack = Class.forName(CALLBACK_PACKAGE + "." + kiwoomApiCode);
             Constructor<?> constructor = callBack.getConstructor(String.class,String.class);
-            DefaultCallbackController defaultCallbackController = (DefaultCallbackController) constructor.newInstance(param,data);
+            DefaultCallbackController defaultCallbackController = (DefaultCallbackController) constructor.newInstance(callbackId,data);
             defaultCallbackController.disposeMessage();
             sendMessage(SystemMessageType.SUCCESS);
         }catch(Exception e){

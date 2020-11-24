@@ -58,34 +58,6 @@ public class KiwoomApiServer{
         ApiServer apiServer = new ApiServer(receivePort,"com.seomse.stock");
         apiServer.start();
 
-        try {Thread.sleep(60000l);} catch (InterruptedException e) {}
         logger.info("START SERVER : " + DateUtil.getDateYmd(System.currentTimeMillis(),"yyyy-MM-dd HH:mm:ss"));
-
-        KiwoomDateCrawler kiwoomDateCrawler = new KiwoomDateCrawler();
-        kiwoomDateCrawler.setState(Service.State.START);
-        kiwoomDateCrawler.setSleepTime(60000l);
-        kiwoomDateCrawler.start();
-
-    }
-
-    public static void main(String [] args){
-
-        String fileContents = FileUtil.getFileContents(new File("config/kiwoom_config"), "UTF-8");
-        fileContents = fileContents.replace("\\\\","\\");
-        fileContents = fileContents.replace("\\","\\\\");
-        JSONObject jsonObject = new JSONObject(fileContents);
-        int receivePort = jsonObject.getInt("api_receive_port") ;
-        int sendPort = jsonObject.getInt("api_send_port") ;
-
-
-        KiwoomProcessMonitorService monitorService = new KiwoomProcessMonitorService();
-        monitorService.setSleepTime(60000L);
-        monitorService.setState(Service.State.START);
-        monitorService.start();
-
-        KiwoomApiServer apiServer = new KiwoomApiServer(receivePort,sendPort);
-        apiServer.start();
-
-
     }
 }

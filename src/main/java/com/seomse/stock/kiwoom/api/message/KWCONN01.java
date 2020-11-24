@@ -1,5 +1,4 @@
 package com.seomse.stock.kiwoom.api.message;
-
 import com.seomse.api.ApiMessage;
 import com.seomse.commons.utils.ExceptionUtil;
 import com.seomse.system.commons.SystemMessageType;

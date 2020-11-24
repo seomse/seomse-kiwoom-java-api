@@ -17,12 +17,10 @@ package com.seomse.stock.kiwoom.api.callback.control;
 
 public abstract class DefaultCallbackController {
     protected String message;
-    protected String param;
     protected String callbackId;
     protected static final String PARAM_SEPARATOR=",";
     protected static final String DATA_SEPARATOR="\\|";
-    public DefaultCallbackController(String param,String message,String callbackId){
-        this.param = param;
+    public DefaultCallbackController( String callbackId,String message){
         this.message = message;
         this.callbackId = callbackId;
     }

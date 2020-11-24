@@ -24,14 +24,13 @@ import java.util.List;
  */
 
 public class OPT10086 extends DefaultCallbackController{
-    private String itemCode = null;
-    public OPT10086(String param, String message, String callbackId) {
-        super(param,message,callbackId);
-        itemCode = param;
+    public OPT10086(String callbackId , String message) {
+        super(callbackId ,  message);
     }
 
     @Override
     public void disposeMessage() {
+        /*
         String[] messageArr = message.split("\n",-1);
         KiwoomCrawlDailyCheckNo checkNo = getCheckNo(param);
         String lastYmd = checkNo.getYMD_LAST();
@@ -56,8 +55,10 @@ public class OPT10086 extends DefaultCallbackController{
             JdbcNaming.insert(insertList);
             JdbcNaming.update(checkNo, false);
         }
-    }
 
+         */
+    }
+    /*
     private KiwoomCrawlDailyPriceNo makePriceNo(String message) {
         KiwoomCrawlDailyPriceNo priceNo = new KiwoomCrawlDailyPriceNo();
 
@@ -117,4 +118,6 @@ public class OPT10086 extends DefaultCallbackController{
         }
         return no;
     }
+
+     */
 }

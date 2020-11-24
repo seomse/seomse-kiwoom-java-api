@@ -21,17 +21,15 @@ import com.seomse.stock.kiwoom.data.no.KiwoomCrawlDailyPriceNo;
  */
 
 public class OPT10015 extends DefaultCallbackController{
-    private String itemCode = null;
-    public OPT10015(String param, String message,String callbackId) {
-        super(param,message,callbackId);
-        itemCode = param;
+    public OPT10015(String callbackId , String message) {
+        super(callbackId , message);
     }
 
     @Override
     public void disposeMessage() {
-        String[] messageArr = message.split("\n",-1);
-        KiwoomCrawlDailyCheckNo checkNo = getCheckNo(param);
-        String lastYmd = checkNo.getYMD_LAST();
+        /*String[] messageArr = message.split("\n",-1);
+        //KiwoomCrawlDailyCheckNo checkNo = getCheckNo(param);
+        ///String lastYmd = checkNo.getYMD_LAST();
         long lastDate = -1;
         if(lastYmd != null){
             lastDate = DateUtil.getDateTime(lastYmd,"yyyyMMdd") ;
@@ -45,6 +43,8 @@ public class OPT10015 extends DefaultCallbackController{
                 JdbcNaming.insert(priceNo);
             }
         }
+
+         */
     }
 
     private KiwoomCrawlDailyPriceNo makePriceNo(String message) {
@@ -82,7 +82,7 @@ public class OPT10015 extends DefaultCallbackController{
          */
         KiwoomCrawlDailyPriceNo priceNo = new KiwoomCrawlDailyPriceNo();
 
-        priceNo.setITEM_CD(itemCode);
+        //priceNo.setITEM_CD(itemCode);
 //        priceNo.setYMD();
         String [] dataArr = message.split(DATA_SEPARATOR);
         String ymd = dataArr[0];

@@ -27,7 +27,7 @@ public class KiwoomClient {
 
     public void ping() throws Exception{
         try {
-            request.sendToReceiveMessage("KWPING01", "PING!");
+            //request.sendToReceiveMessage("KWPING01", "PING!");
         } catch(Exception e){
             throw e;
         }

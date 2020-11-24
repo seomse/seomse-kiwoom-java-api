@@ -31,15 +31,8 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class KiwoomProcessMonitorService extends Service {
     private static final Logger logger = getLogger(KiwoomProcessMonitorService.class);
     private String lastExecuteDate = "19700101";
-    private String apiProcessName=null;
-    private String apiProcessPath=null;
+
     public KiwoomProcessMonitorService(){
-        String fileContents = FileUtil.getFileContents(new File("config/kiwoom_config"), "UTF-8");
-        fileContents = fileContents.replace("\\\\","\\");
-        fileContents = fileContents.replace("\\","\\\\");
-        JSONObject jsonObject = new JSONObject(fileContents);
-        apiProcessName = jsonObject.getString("process_name") ;
-        apiProcessPath = jsonObject.getString("process_file_path") ;
     }
     @Override
     public void work() {
@@ -53,79 +46,21 @@ public class KiwoomProcessMonitorService extends Service {
             if(mm <= 10){
                 return;
             } else {
-                startVersionUp(nowYmd);
+                KiwoomProcess.startVersionUp(nowYmd);
+                lastExecuteDate = nowYmd;
             }
         } else {
             return;
         }
     }
 
-    public void checkProcess(){
-        try {
-            final Process process = new ProcessBuilder("tasklist.exe", "/fo", "csv", "/nh").start();
-            new Thread(() -> {
-                Scanner sc = new Scanner(process.getInputStream());
-                if (sc.hasNextLine()) sc.nextLine();
-
-                while (sc.hasNextLine()) {
-                    String line = sc.nextLine();
-                    String[] parts = line.split(",");
-                    String unq = parts[0].substring(1).replaceFirst(".$", "");
-                    if(unq.toLowerCase().equals(apiProcessName.toLowerCase() )){
-                        return;
-                    }
-                }
-                logger.info("runProcess");
-                ProcessRunner.runProcess(apiProcessPath,false);
-                try {
-                    Thread.sleep(10000L);
-                } catch (InterruptedException e) {
-                    logger.error(ExceptionUtil.getStackTrace(e));
-                }
-            }).start();
-        }catch (IOException e) {}
-    }
-
-    public void startVersionUp(String nowYmd){
-        logger.info("startVersionUp process.. ["+nowYmd+"] ");
-        Runtime runtime = Runtime.getRuntime();
-
-        //try {Process versionUpprocess = runtime.exec("C:\\OpenAPI\\opversionup.exe");} catch (IOException e) {}
-        try {Thread.sleep(1000l * 60l);} catch (InterruptedException e) {}
-
-        try {
-            final Process process = new ProcessBuilder("tasklist.exe", "/fo", "csv", "/nh").start();
-            new Thread(() -> {
-                Scanner sc = new Scanner(process.getInputStream());
-                if (sc.hasNextLine()) sc.nextLine();
-                while (sc.hasNextLine()) {
-                    String line = sc.nextLine();
-                    String[] parts = line.split(",");
-                    String unq = parts[0].substring(1).replaceFirst(".$", "");
-                    if(unq.equals("opversionup.exe")){
-                        if(process.isAlive()){
-                            logger.info("process kill opversionup.exe ["+nowYmd+"] ");
-                            try {runtime.exec("taskkill /F /IM opversionup.exe");} catch (IOException e) {}
-                        }
-                    }
-                }
-            }).start();
-            process.waitFor();
-
-        }
-        catch (IOException | InterruptedException e) {
-            logger.error(ExceptionUtil.getStackTrace(e));
-        }
-        lastExecuteDate = nowYmd;
-
-    }
     public static void main(String [] args){
 //        Service service = new KiwoomProcessMonitorService();
 //        service.setSleepTime(1000l);
 //        service.setState(State.START);
 //        service.start();
 
-        new KiwoomProcessMonitorService().checkProcess();
+        //new KiwoomProcessMonitorService().checkProcess();
     }
 
 }

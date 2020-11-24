@@ -26,104 +26,13 @@ import java.util.List;
 
 public class OPT10013 extends DefaultCallbackController{
     private String itemCode = null;
-    private static final String OPT_CODE = "OPT10013";
-    private static final String DATE_TYPE = "D";
-    public OPT10013(String param, String message, String callbackId) {
-        super(param,message,callbackId);
-        itemCode = param;
+    public OPT10013( String callbackId , String message) {
+        super(callbackId,message);
 
     }
 
     @Override
     public void disposeMessage() {
         KiwoomApiLock.getInstance().putCallbackData(callbackId,message);
-        String[] messageArr = message.split("\n",-1);
-        KiwoomCrawlStatusNo checkNo = getCheckNo(param);
-        String lastYmd = checkNo.getYMD_LAST();
-        List<KiwoomCrawlDailyPriceNo> insertList = new ArrayList<>();
-        for(int i=messageArr.length-1;i>=0;i--){
-            String data = messageArr[i];
-            KiwoomCrawlDailyPriceNo priceNo = makePriceNo(data);
-            String priceYmd = priceNo.getYMD();
-            long priceDate = DateUtil.getDateTime(priceYmd,"yyyyMMdd") ;
-            long lastDate = DateUtil.getDateTime(lastYmd,"yyyyMMdd") ;
-            if(priceDate > lastDate){
-                insertList.add(priceNo);
-                checkNo.setCNT_DATA( checkNo.getCNT_DATA() + 1 );
-                checkNo.setYMD_LAST(priceYmd);
-                long firstDate = DateUtil.getDateTime(checkNo.getYMD_FIRST(),"yyyyMMdd");
-                if(firstDate > priceDate){
-                    checkNo.setYMD_FIRST(priceYmd);
-                }
-            }
-        }
-        if(insertList.size() > 0) {
-            for (KiwoomCrawlDailyPriceNo insertNo : insertList) {
-                JdbcNaming.insertOrUpdate(insertNo,false);
-            }
-            JdbcNaming.update(checkNo, false);
-        }
-    }
-
-    private KiwoomCrawlDailyPriceNo makePriceNo(String message) {
-        KiwoomCrawlDailyPriceNo priceNo = new KiwoomCrawlDailyPriceNo();
-
-        priceNo.setITEM_CD(itemCode);
-        String [] dataArr = message.split(DATA_SEPARATOR);
-        String ymd = dataArr[0];
-        Double price = Double.parseDouble( dataArr[4].substring(1) );
-
-        Double startPrice = Double.parseDouble( dataArr[1].substring(1) );
-        Double lowPrice = Double.parseDouble( dataArr[2].substring(1) );
-        Double highPrice = Double.parseDouble( dataArr[3].substring(1) );
-
-        String updownPrice = dataArr[5];
-        Double prePrice = price;
-        if(updownPrice.startsWith("-")){
-            prePrice -= Integer.parseInt(updownPrice.substring(1));
-        } else {
-            prePrice += Integer.parseInt(updownPrice.substring(1));
-        }
-        Double volume = Double.parseDouble( dataArr[7] );
-
-        Double personVolume=Double.parseDouble(dataArr[10].substring(1) );
-        Double goverVolume=Double.parseDouble(dataArr[11].substring(1) );
-        Double foreignerVolume=Double.parseDouble(dataArr[12].substring(1) );
-        Double foreignVolume=Double.parseDouble(dataArr[13].substring(1) );
-        Double programVolume=Double.parseDouble(dataArr[13].substring(1) );
-
-        Double creditRate = Double.parseDouble(dataArr[22]);
-
-        priceNo.setYMD(ymd);
-        priceNo.setITEM_CD(itemCode);
-        priceNo.setSTART_PRC(startPrice);
-        priceNo.setLAST_PRC(price);
-        priceNo.setPREVIOUS_PRC(prePrice);
-        priceNo.setMIN_PRC(lowPrice);
-        priceNo.setMAX_PRC(highPrice);
-        priceNo.setINDIVIDUAL_TRADE_VOL(personVolume);
-        priceNo.setINSTITUTION_TRADE_VOL(goverVolume);
-        priceNo.setFOREIGNER_TRADE_VOL(foreignerVolume);
-        priceNo.setFOREIGN_TRADE_VOL(foreignVolume);
-        priceNo.setPROGRAM_TRADE_VOL(programVolume);
-        priceNo.setCREDIT_RT(creditRate);
-        priceNo.setTRADE_VOL(volume);
-
-        return priceNo;
-    }
-
-    private KiwoomCrawlStatusNo getCheckNo(String itemCode) {
-        KiwoomCrawlStatusNo no = JdbcNaming.getObj(KiwoomCrawlStatusNo.class , "ITEM_CD='"+itemCode+"' AND TIME_CD='"+DATE_TYPE+"' AND CRAWL_TP='"+OPT_CODE+"'");
-        if(no == null){
-            no = new KiwoomCrawlStatusNo();
-            no.setITEM_CD(itemCode);
-            no.setCRAWL_TP(OPT_CODE);
-            no.setTIME_CD(DATE_TYPE);
-            no.setCNT_DATA(0l);
-            no.setYMD_LAST("19700101");
-            no.setYMD_FIRST("29000101");
-            JdbcNaming.insert(no);
-        }
-        return no;
     }
 }

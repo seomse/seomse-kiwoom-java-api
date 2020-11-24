@@ -48,7 +48,7 @@ public class KiwoomClientManager {
                 try { Thread.sleep(CLIENT_CHECK_DELAY);} catch (InterruptedException e) { }
 
                 List<KiwoomClient> kiwoomClientList = new ArrayList<>(kiwoomClientMap.values());
-                logger.debug("CHECK CLIENT.. ("+kiwoomClientMap.size()+")");
+                //logger.debug("CHECK CLIENT.. ("+kiwoomClientMap.size()+")");
                 List<String> removeList = new ArrayList<>();
                 for (KiwoomClient client : kiwoomClientList) {
                     try {
@@ -90,12 +90,12 @@ public class KiwoomClientManager {
         String callbackId = UUID.randomUUID().toString();
         KiwoomApiLock.getInstance().putCallbackId(callbackId);
 
-        request.sendMessage(makeCodeParam("KWTR0001","OPT10015")
+        request.sendMessage(makeCodeParam("KWTR0001","OPT10013",callbackId)
                 ,makeDataParam(stockCode,date,"1"));
 
         while(true){
             try {
-                Thread.sleep(100L);
+                Thread.sleep(10L);
                 String callbackData = KiwoomApiLock.getInstance().getCallbackData(callbackId);
                 if(callbackData != null){
                     return callbackData;
@@ -123,6 +123,9 @@ public class KiwoomClientManager {
         lock.lock();
         KiwoomClient kiwoomClient = null;
         int clientSize = kiwoomClientMap.keySet().size();
+        if(clientSize == 0){
+
+        }
         int randClient = new Random().nextInt(clientSize);
         List<String> clientIdList = new LinkedList<>( kiwoomClientMap.keySet());
         // 랜덤으로 교체 예정
