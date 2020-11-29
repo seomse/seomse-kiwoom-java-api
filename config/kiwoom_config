@@ -1,0 +1,6 @@
+{
+    "api_receive_port":33333,
+    "api_send_port":33334,
+    "process_name":"KiwoomApi.exe",
+    "process_file_path":"C:\workspace\git\seomse-kiwoom-api\KiwoomApi\bin\x86\Debug\KiwoomApi.exe"
+}

@@ -44,7 +44,7 @@ public class KiwoomDateCreditCrawler {
     private String DATE_YMD = "yyyyMMdd";
     private static final String CRAWL_TYPE = "CREDIT";
     private static final String DATA_SEPARATOR = "\\|";
-    private static final Long CRAWL_SLEEP_TIME = 4000L;
+    private static final Long CRAWL_SLEEP_TIME = 2000L;
 
     /**
      * 마지막 응답 결과 저장용 객체
@@ -305,7 +305,7 @@ public class KiwoomDateCreditCrawler {
         KiwoomApiServer apiServer = new KiwoomApiServer(receivePort,sendPort);
         apiServer.start();
 
-        KiwoomProcess.checkProcess();
+        KiwoomProcess.rerunKiwoomApi();
         new Thread(() -> {
             try {
                 Thread.sleep(10000L);
@@ -314,7 +314,7 @@ public class KiwoomDateCreditCrawler {
             }
 
             logger.info("item trade CREDIT start");
-            List<String> codeList = JdbcQuery.getStringList("SELECT ITEM_CD FROM T_STOCK_ITEM WHERE DELISTING_DT IS NULL");
+            List<String> codeList = JdbcQuery.getStringList("SELECT ITEM_CD FROM T_STOCK_ITEM WHERE DELISTING_DT IS NULL AND ITEM_CD NOT IN ( SELECT ITEM_CD FROM T_CRAWLING_KIWOOM_TR WHERE YMD_LAST LIKE '202011%' )");
 
             int index = 0;
             for(String code : codeList){

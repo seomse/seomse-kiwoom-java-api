@@ -30,6 +30,10 @@ public class KiwoomProcess {
     private static final Logger logger = getLogger(KiwoomProcess.class);
     private static String apiProcessName=null;
     private static String apiProcessPath=null;
+
+    private static final String TASKLIST = "tasklist";
+    private static final String KILL = "taskkill /F /IM ";
+
     static {
         String fileContents = FileUtil.getFileContents(new File("config/kiwoom_config"), "UTF-8");
         fileContents = fileContents.replace("\\\\","\\");
@@ -38,31 +42,49 @@ public class KiwoomProcess {
         apiProcessName = jsonObject.getString("process_name") ;
         apiProcessPath = jsonObject.getString("process_file_path") ;
     }
-    public static void checkProcess(){
+    public static void rerunKiwoomApi(){
         logger.info("checkProcess..");
-        try {
-            final Process process = new ProcessBuilder("tasklist.exe", "/fo", "csv", "/nh").start();
-            new Thread(() -> {
+        new Thread(() -> {
+            try {
+                final Process process = new ProcessBuilder("tasklist.exe", "/fo", "csv", "/nh").start();
+
                 Scanner sc = new Scanner(process.getInputStream());
                 if (sc.hasNextLine()) sc.nextLine();
-
+                boolean doKillProcess = false;
                 while (sc.hasNextLine()) {
                     String line = sc.nextLine();
                     String[] parts = line.split(",");
                     String unq = parts[0].substring(1).replaceFirst(".$", "");
                     if(unq.toLowerCase().equals(apiProcessName.toLowerCase() )){
-                        return;
+                        try {
+                            killProcess(unq);
+                            try {
+                                Thread.sleep(1000L);
+                            } catch (InterruptedException e) {
+                                logger.error(ExceptionUtil.getStackTrace(e));
+                            }
+                            doKillProcess = true;
+                        } catch (Exception e) {
+                            logger.error(ExceptionUtil.getStackTrace(e));
+                        }
+                    }
+                }
+                if(doKillProcess) {
+                    try {
+                        Thread.sleep(3000L);
+                    } catch (InterruptedException e) {
+                        logger.error(ExceptionUtil.getStackTrace(e));
                     }
                 }
                 logger.info("runProcess");
-                ProcessRunner.runProcess(apiProcessPath,false);
-                try {
-                    Thread.sleep(10000L);
-                } catch (InterruptedException e) {
-                    logger.error(ExceptionUtil.getStackTrace(e));
-                }
-            }).start();
-        }catch (IOException e) {}
+                ProcessRunner.runProcess(apiProcessPath,true);
+            }catch (IOException e) {}
+        }).start();
+        try {
+            Thread.sleep(30000L);
+        } catch (InterruptedException e) {
+            logger.error(ExceptionUtil.getStackTrace(e));
+        }
     }
 
     public static void startVersionUp(String nowYmd){
@@ -93,6 +115,39 @@ public class KiwoomProcess {
 
         }
         catch (IOException | InterruptedException e) {
+            logger.error(ExceptionUtil.getStackTrace(e));
+        }
+
+    }
+
+
+    public static void killProcess(String serviceName) throws Exception {
+
+        try {
+            Runtime.getRuntime().exec(KILL + serviceName);
+            logger.info(serviceName+" killed successfully!");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+    public static void main(String [] args){
+        rerunKiwoomApi();
+        try {
+            Thread.sleep(30000L);
+        } catch (InterruptedException e) {
+            logger.error(ExceptionUtil.getStackTrace(e));
+        }
+        rerunKiwoomApi();
+        try {
+            Thread.sleep(30000L);
+        } catch (InterruptedException e) {
+            logger.error(ExceptionUtil.getStackTrace(e));
+        }
+        rerunKiwoomApi();
+        try {
+            Thread.sleep(30000L);
+        } catch (InterruptedException e) {
             logger.error(ExceptionUtil.getStackTrace(e));
         }
 
