@@ -81,7 +81,7 @@ public class KiwoomProcess {
             }catch (IOException e) {}
         }).start();
         try {
-            Thread.sleep(30000L);
+            Thread.sleep(60000L);
         } catch (InterruptedException e) {
             logger.error(ExceptionUtil.getStackTrace(e));
         }

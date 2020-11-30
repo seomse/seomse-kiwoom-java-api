@@ -306,6 +306,10 @@ public class KiwoomDateCreditCrawler {
         apiServer.start();
 
         KiwoomProcess.rerunKiwoomApi();
+
+        KiwoomProcess.rerunKiwoomApi();
+
+
         new Thread(() -> {
             try {
                 Thread.sleep(10000L);
@@ -319,7 +323,7 @@ public class KiwoomDateCreditCrawler {
             int index = 0;
             for(int i=0;i<codeList.size();i++){
                 String code = codeList.get(i);
-                int nowTime = Integer.parseInt( DateUtil.getDateYmd(System.currentTimeMillis(),"mm") );
+                int nowTime = Integer.parseInt( DateUtil.getDateYmd(System.currentTimeMillis(),"HH") );
                 if(nowTime >= 9 && nowTime <= 16){
                     try {
                         Thread.sleep(1000L);

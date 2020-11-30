@@ -95,7 +95,7 @@ public class KiwoomClientManager {
             // 3초 초과시 키움API 종료후 재시도.
             if(++tryCount > MAX_TRY_COUNT) {
 
-                client = null;
+                KiwoomProcess.rerunKiwoomApi();
 
                 kiwoomClient = getClient();
                 request = kiwoomClient.getRequest();
