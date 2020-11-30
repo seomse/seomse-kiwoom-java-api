@@ -162,22 +162,20 @@ public class KiwoomClientManager {
         lock.lock();
         KiwoomClient kiwoomClient = null;
         int clientSize = kiwoomClientMap.keySet().size();
+        logger.debug("clientSize:"+clientSize);
         if(clientSize == 0){
 
         }
-        int randClient = new Random().nextInt(clientSize);
+        int randClient = 1;
         List<String> clientIdList = new LinkedList<>( kiwoomClientMap.keySet());
         // 랜덤으로 교체 예정
-        for (int i=0; i<clientSize;i++) {
+        for (int i=0; i<clientSize ;i++) {
             String clientId  = clientIdList.get(i);
             kiwoomClient = kiwoomClientMap.get(clientId);
-            if(kiwoomClient.isAlive()) {
-                break;
-            } else {
-                continue;
-            }
+            return kiwoomClient;
         }
         lock.unlock();
+        logger.error("kiwoomClient is null");
         return kiwoomClient;
     }
 
