@@ -95,6 +95,8 @@ public class KiwoomClientManager {
             // 3초 초과시 키움API 종료후 재시도.
             if(++tryCount > MAX_TRY_COUNT) {
 
+                client = null;
+
                 kiwoomClient = getClient();
                 request = kiwoomClient.getRequest();
 
@@ -120,13 +122,13 @@ public class KiwoomClientManager {
 
     private KiwoomClient getClient() {
         lock.lock();
-        lock.unlock();
         while(true) {
             KiwoomClient kiwoomClient = this.client;
             if (kiwoomClient == null) {
                 logger.error("kiwoomClient is null");
                 KiwoomProcess.rerunKiwoomApi();
             } else {
+                lock.unlock();
                 return kiwoomClient;
             }
         }
