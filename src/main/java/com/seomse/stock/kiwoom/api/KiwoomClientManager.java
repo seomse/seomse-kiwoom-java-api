@@ -28,54 +28,18 @@ public class KiwoomClientManager {
     private static final ReentrantLock lock = new ReentrantLock();
     private static final Logger logger = LoggerFactory.getLogger(KiwoomClientManager.class);
     private static class SingleTonHolder{ private static final KiwoomClientManager INSTANCE = new KiwoomClientManager();}
-    private KiwoomClientManager(){
-        clientListCheckStart();
-    }
+    private KiwoomClientManager(){}
     public static KiwoomClientManager getInstance(){return SingleTonHolder.INSTANCE;}
-    private Map<String,KiwoomClient> kiwoomClientMap = new HashMap<>();
+//    private Map<String,KiwoomClient> kiwoomClientMap = new HashMap<>();
+    KiwoomClient client=null;
 
     private static final String PARAM_CODE_SEPARATOR = ",";
     private static final String PARAM_DATA_SEPARATOR = "|";
 
-    private static final Long CLIENT_CHECK_DELAY = 3000l;
-
-    boolean alreadyCheckStarted = false;
-    public void clientListCheckStart(){
-        if(alreadyCheckStarted){
-            return;
-        }
-        new Thread(() -> {
-            while(true){
-                try { Thread.sleep(CLIENT_CHECK_DELAY);} catch (InterruptedException e) { }
-
-                List<KiwoomClient> kiwoomClientList = new ArrayList<>(kiwoomClientMap.values());
-                //logger.debug("CHECK CLIENT.. ("+kiwoomClientMap.size()+")");
-                List<String> removeList = new ArrayList<>();
-                for (KiwoomClient client : kiwoomClientList) {
-                    try {
-                        client.ping();
-                    } catch(Exception e){
-                        removeList.add(client.getId());
-                    }
-                }
-                for (String clientId : removeList) {
-                    removeClient(clientId);
-                }
-            }
-        }).start();
-        alreadyCheckStarted = true;
-    }
-
     public void addClient(String clientId, ApiRequest request){
         lock.lock();
-        KiwoomClient client = new KiwoomClient(clientId , request);
-        kiwoomClientMap.put(clientId , client);
-        lock.unlock();
-    }
-
-    public void removeClient(String clientId){
-        lock.lock();
-        kiwoomClientMap.remove(clientId);
+        KiwoomClient newClient = new KiwoomClient(clientId , request);
+        this.client = newClient;
         lock.unlock();
     }
 
@@ -131,8 +95,6 @@ public class KiwoomClientManager {
             // 3초 초과시 키움API 종료후 재시도.
             if(++tryCount > MAX_TRY_COUNT) {
 
-                kiwoomClientMap.clear();
-
                 KiwoomProcess.rerunKiwoomApi();
 
                 kiwoomClient = getClient();
@@ -160,22 +122,11 @@ public class KiwoomClientManager {
 
     private KiwoomClient getClient() {
         lock.lock();
-        KiwoomClient kiwoomClient = null;
-        int clientSize = kiwoomClientMap.keySet().size();
-        logger.debug("clientSize:"+clientSize);
-        if(clientSize == 0){
-
-        }
-        int randClient = 1;
-        List<String> clientIdList = new LinkedList<>( kiwoomClientMap.keySet());
-        // 랜덤으로 교체 예정
-        for (int i=0; i<clientSize ;i++) {
-            String clientId  = clientIdList.get(i);
-            kiwoomClient = kiwoomClientMap.get(clientId);
-            return kiwoomClient;
-        }
+        KiwoomClient kiwoomClient = this.client;
         lock.unlock();
-        logger.error("kiwoomClient is null");
+        if(kiwoomClient == null) {
+            logger.error("kiwoomClient is null");
+        }
         return kiwoomClient;
     }
 

@@ -1,6 +1,7 @@
 package com.seomse.stock.kiwoom.api.message;
 import com.seomse.api.ApiMessage;
 import com.seomse.commons.utils.ExceptionUtil;
+import com.seomse.stock.kiwoom.api.KiwoomClientManager;
 import com.seomse.system.commons.SystemMessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

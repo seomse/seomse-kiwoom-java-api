@@ -48,6 +48,7 @@ public class KiwoomApiServer{
             Socket socket = request.getSocket();
             InetAddress inetAddress = socket.getInetAddress();
             String nodeKey = inetAddress.getHostAddress() + "," + inetAddress.getHostName();
+            logger.debug("NEW NODE CONNECTED : " + nodeKey);
             KiwoomClientManager.getInstance().addClient(nodeKey,request);
 //            KiwoomClientManager.getInstance().getDatePriceData("005930","20200724");
         };
