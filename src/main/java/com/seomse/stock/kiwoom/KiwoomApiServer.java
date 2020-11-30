@@ -43,8 +43,6 @@ public class KiwoomApiServer extends Thread{
     @Override
     public void run(){
         ApiRequestConnectHandler handler =  request -> {
-
-            request.setNotLog();
             Socket socket = request.getSocket();
             InetAddress inetAddress = socket.getInetAddress();
             String nodeKey = inetAddress.getHostAddress() + "," + inetAddress.getHostName();

@@ -317,7 +317,18 @@ public class KiwoomDateCreditCrawler {
             List<String> codeList = JdbcQuery.getStringList("SELECT ITEM_CD FROM T_STOCK_ITEM WHERE DELISTING_DT IS NULL AND ITEM_CD NOT IN ( SELECT ITEM_CD FROM T_CRAWLING_KIWOOM_TR WHERE YMD_LAST LIKE '202011%' )");
 
             int index = 0;
-            for(String code : codeList){
+            for(int i=0;i<codeList.size();i++){
+                String code = codeList.get(i);
+                int nowTime = Integer.parseInt( DateUtil.getDateYmd(System.currentTimeMillis(),"mm") );
+                if(nowTime >= 9 && nowTime <= 16){
+                    try {
+                        Thread.sleep(1000L);
+                    } catch (InterruptedException e) {
+                        logger.error(ExceptionUtil.getStackTrace(e));
+                    }
+                    i--;
+                    continue;
+                }
                 try {
                     logger.debug("CREDIT code: " + code + " " + ++index + " " + codeList.size());
 
