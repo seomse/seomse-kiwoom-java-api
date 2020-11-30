@@ -33,15 +33,15 @@ import static org.slf4j.LoggerFactory.getLogger;
  * @author Copyrights 2014 ~ 2020 by ㈜ WIGO. All right reserved.
  */
 
-public class KiwoomApiServer{
+public class KiwoomApiServer extends Thread{
     private static final Logger logger = getLogger(KiwoomApiServer.class);
     int receivePort,sendPort;
     public KiwoomApiServer(int receivePort , int sendPort){
         this.receivePort = receivePort;
         this.sendPort = sendPort;
     }
-
-    public void start(){
+    @Override
+    public void run(){
         ApiRequestConnectHandler handler =  request -> {
 
             request.setNotLog();

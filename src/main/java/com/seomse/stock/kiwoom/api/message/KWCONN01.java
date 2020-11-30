@@ -30,7 +30,7 @@ public class KWCONN01 extends ApiMessage {
         try{
 
             String apiId = message;
-            //KiwoomClientManager.getInstance().addClient(apiId , this.communication);
+            //KiwoomClientManager.getInstance().addClient(apiId , );
             logger.debug("ADD CLIENT! : " + apiId);
             sendMessage(SystemMessageType.SUCCESS);
         }catch(Exception e){
