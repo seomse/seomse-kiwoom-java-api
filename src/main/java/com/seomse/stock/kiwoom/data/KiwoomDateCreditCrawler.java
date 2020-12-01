@@ -318,7 +318,7 @@ public class KiwoomDateCreditCrawler {
             }
 
             logger.info("item trade CREDIT start");
-            List<String> codeList = JdbcQuery.getStringList("SELECT ITEM_CD FROM T_STOCK_ITEM WHERE DELISTING_DT IS NULL AND ITEM_CD NOT IN ( SELECT ITEM_CD FROM T_CRAWLING_KIWOOM_TR WHERE YMD_LAST LIKE '202011%' )");
+            List<String> codeList = JdbcQuery.getStringList("SELECT ITEM_CD FROM T_STOCK_ITEM WHERE DELISTING_DT IS NULL AND ITEM_CD NOT IN ( SELECT ITEM_CD FROM T_CRAWLING_KIWOOM_TR WHERE YMD_LAST LIKE '202011%' OR YMD_LAST LIKE '202012%' )");
 
             int index = 0;
             for(int i=0;i<codeList.size();i++){

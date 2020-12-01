@@ -48,7 +48,6 @@ public class KiwoomApiServer extends Thread{
             String nodeKey = inetAddress.getHostAddress() + "," + inetAddress.getHostName();
             logger.debug("NEW NODE CONNECTED : " + nodeKey);
             KiwoomClientManager.getInstance().addClient(nodeKey,request);
-//            KiwoomClientManager.getInstance().getDatePriceData("005930","20200724");
         };
 
         ApiRequestServer apiRequestServer = new ApiRequestServer(sendPort, handler);
