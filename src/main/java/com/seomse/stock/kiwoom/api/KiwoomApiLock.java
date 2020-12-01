@@ -36,12 +36,23 @@ public class KiwoomApiLock {
         lock.unlock();
     }
 
+    /**
+     * 콜백 데이터를 적재
+     * @param callbackId
+     * @param data
+     */
     public void putCallbackData(String callbackId , String data){
         lock.lock();
         callbackMap.put(callbackId,data);
         lock.unlock();
     }
 
+    /**
+     * 콜백 데이터를 가져온다.
+     * 데이터가 존재시엔, 해당 데이터를 삭제 하고 가져온다.
+     * @param callbackId
+     * @return
+     */
     public String getCallbackData(String callbackId){
         lock.lock();
         String data = callbackMap.get(callbackId);

@@ -38,11 +38,11 @@ import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class KiwoomDateCreditCrawler {
-    private static final Logger logger = getLogger(KiwoomDateCreditCrawler.class);
+public class KiwoomDateVPCrawler {
+    private static final Logger logger = getLogger(KiwoomDateVPCrawler.class);
 
     private String DATE_YMD = "yyyyMMdd";
-    private static final String CRAWL_TYPE = "CREDIT";
+    private static final String CRAWL_TYPE = "VP";
     private static final String DATA_SEPARATOR = "\\|";
     private static final Long CRAWL_SLEEP_TIME = 2000L;
 
@@ -208,7 +208,6 @@ public class KiwoomDateCreditCrawler {
      */
     private CrawlResponse crawlItem(String itemCode, String startDate) {
 
-
         CrawlResponse response = new CrawlResponse(false,"","");
 
         String dateCreditAllData = KiwoomClientManager.getInstance().getDateCreditData(itemCode, startDate);
@@ -334,7 +333,7 @@ public class KiwoomDateCreditCrawler {
                 try {
                     logger.debug("CREDIT code: " + code + " " + ++index + " " + codeList.size());
 
-                    new KiwoomDateCreditCrawler().updateSingle(code);
+                    new KiwoomDateVPCrawler().updateSingle(code);
                 }catch(Exception e){
                     logger.error(ExceptionUtil.getStackTrace(e));
                 }

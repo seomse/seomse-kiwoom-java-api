@@ -17,6 +17,7 @@ package com.seomse.stock.kiwoom.process;
 
 import com.seomse.commons.utils.ExceptionUtil;
 import com.seomse.commons.utils.FileUtil;
+import com.seomse.commons.utils.date.DateUtil;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -27,13 +28,19 @@ import java.util.Scanner;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class KiwoomProcess {
+
     private static final Logger logger = getLogger(KiwoomProcess.class);
+
     private static String apiProcessName=null;
     private static String apiProcessPath=null;
+    private static String apiVersionUpPath=null;
 
     private static final String TASKLIST = "tasklist";
     private static final String KILL = "taskkill /F /IM ";
 
+    /**
+     * CONFIG 설정
+     */
     static {
         String fileContents = FileUtil.getFileContents(new File("config/kiwoom_config"), "UTF-8");
         fileContents = fileContents.replace("\\\\","\\");
@@ -41,7 +48,13 @@ public class KiwoomProcess {
         JSONObject jsonObject = new JSONObject(fileContents);
         apiProcessName = jsonObject.getString("process_name") ;
         apiProcessPath = jsonObject.getString("process_file_path") ;
+        apiVersionUpPath = jsonObject.getString("version_up_file_path") ;
     }
+
+    /**
+     * 키움 API를 실행한다.
+     * 이미 실행시, 종료후 실행 한다.
+     */
     public static void rerunKiwoomApi(){
         logger.info("checkProcess..");
         new Thread(() -> {
@@ -87,11 +100,12 @@ public class KiwoomProcess {
         }
     }
 
-    public static void startVersionUp(String nowYmd){
+    /**
+     * 키움 API의 버전업을 실행 한다.
+     */
+    public static void startVersionUp(){
+        String nowYmd = DateUtil.getDateYmd(System.currentTimeMillis(),"yyyy-MM-dd");
         logger.info("startVersionUp process.. ["+nowYmd+"] ");
-        Runtime runtime = Runtime.getRuntime();
-
-        //try {Process versionUpprocess = runtime.exec("C:\\OpenAPI\\opversionup.exe");} catch (IOException e) {}
         try {Thread.sleep(1000l * 60l);} catch (InterruptedException e) {}
 
         try {
@@ -106,21 +120,23 @@ public class KiwoomProcess {
                     if(unq.equals("opversionup.exe")){
                         if(process.isAlive()){
                             logger.info("process kill opversionup.exe ["+nowYmd+"] ");
-                            try {runtime.exec("taskkill /F /IM opversionup.exe");} catch (IOException e) {}
                         }
                     }
                 }
             }).start();
             process.waitFor();
-
         }
         catch (IOException | InterruptedException e) {
             logger.error(ExceptionUtil.getStackTrace(e));
         }
-
+        ProcessRunner.runProcess(apiVersionUpPath,true);
     }
 
-
+    /**
+     * 프로세스를 종료 한다
+     * @param serviceName 서비스명
+     * @throws Exception
+     */
     public static void killProcess(String serviceName) throws Exception {
 
         try {
@@ -128,27 +144,6 @@ public class KiwoomProcess {
             logger.info(serviceName+" killed successfully!");
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
-    }
-    public static void main(String [] args){
-        rerunKiwoomApi();
-        try {
-            Thread.sleep(30000L);
-        } catch (InterruptedException e) {
-            logger.error(ExceptionUtil.getStackTrace(e));
-        }
-        rerunKiwoomApi();
-        try {
-            Thread.sleep(30000L);
-        } catch (InterruptedException e) {
-            logger.error(ExceptionUtil.getStackTrace(e));
-        }
-        rerunKiwoomApi();
-        try {
-            Thread.sleep(30000L);
-        } catch (InterruptedException e) {
-            logger.error(ExceptionUtil.getStackTrace(e));
         }
 
     }
