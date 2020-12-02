@@ -1,4 +1,4 @@
-package com.seomse.stock.kiwoom.data.no;
+package com.seomse.stock.kiwoom.crawl.no;
 
 import com.seomse.jdbc.annotation.DateTime;
 import com.seomse.jdbc.annotation.PrimaryKey;

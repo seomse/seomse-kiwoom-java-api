@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seomse.stock.kiwoom.data;
+package com.seomse.stock.kiwoom.crawl;
 
 import com.seomse.commons.service.Service;
 import com.seomse.commons.utils.ExceptionUtil;
@@ -23,9 +23,9 @@ import com.seomse.commons.utils.time.DateUtil;
 import com.seomse.jdbc.JdbcQuery;
 import com.seomse.jdbc.naming.JdbcNaming;
 import com.seomse.stock.kiwoom.KiwoomApiServer;
-import com.seomse.stock.kiwoom.api.KiwoomClientManager;
-import com.seomse.stock.kiwoom.data.no.KiwoomCrawlDailyCreditNo;
-import com.seomse.stock.kiwoom.data.no.KiwoomCrawlStatusNo;
+import com.seomse.stock.kiwoom.api.KiwoomApiSender;
+import com.seomse.stock.kiwoom.crawl.no.KiwoomCrawlDailyCreditNo;
+import com.seomse.stock.kiwoom.crawl.no.KiwoomCrawlStatusNo;
 import com.seomse.stock.kiwoom.process.KiwoomProcess;
 import com.seomse.stock.kiwoom.process.KiwoomProcessMonitorService;
 import org.json.JSONObject;
@@ -37,12 +37,11 @@ import java.util.Calendar;
 import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
-
-public class KiwoomDateVPCrawler {
-    private static final Logger logger = getLogger(KiwoomDateVPCrawler.class);
+public class KiwoomDateCreditCrawler {
+    private static final Logger logger = getLogger(KiwoomDateCreditCrawler.class);
 
     private String DATE_YMD = "yyyyMMdd";
-    private static final String CRAWL_TYPE = "VP";
+    private static final String CRAWL_TYPE = "CREDIT";
     private static final String DATA_SEPARATOR = "\\|";
     private static final Long CRAWL_SLEEP_TIME = 2000L;
 
@@ -136,7 +135,9 @@ public class KiwoomDateVPCrawler {
             for (KiwoomCrawlDailyCreditNo daumCrawlChartNo : allInsertChartNoList) {
                 JdbcNaming.insertOrUpdate(daumCrawlChartNo,false);
             }
-            insertOrUpdateStatusNo(allInsertChartNoList,statusNo);
+            if(allInsertChartNoList.size() > 0) {
+                insertOrUpdateStatusNo(allInsertChartNoList, statusNo);
+            }
             logger.debug("""
                 ITEM CODE [%s] END! COUNT [%d] UPDATE DATE [%s]
                 """.formatted(itemCode,allInsertChartNoList.size() , statusNo.getYMD_LAST()));
@@ -173,9 +174,6 @@ public class KiwoomDateVPCrawler {
      * @param statusNo 수집상태 NO
      */
     private void insertOrUpdateStatusNo(List<KiwoomCrawlDailyCreditNo> chartNoList, KiwoomCrawlStatusNo statusNo) {
-        if(chartNoList.size() == 0){
-            return ;
-        }
         Integer statusCnt = statusNo.getDATA_CNT();
         int insertCnt = chartNoList.size();
         long statusFirst = DateUtil.getDateTime( statusNo.getYMD_FIRST(),DATE_YMD);
@@ -208,9 +206,10 @@ public class KiwoomDateVPCrawler {
      */
     private CrawlResponse crawlItem(String itemCode, String startDate) {
 
+
         CrawlResponse response = new CrawlResponse(false,"","");
 
-        String dateCreditAllData = KiwoomClientManager.getInstance().getDateCreditData(itemCode, startDate);
+        String dateCreditAllData = KiwoomApiSender.getDateCreditData(itemCode, startDate);
         if(dateCreditAllData == null || dateCreditAllData.length() == 0 || dateCreditAllData.equals("FAIL")){
             return response;
         }
@@ -318,7 +317,7 @@ public class KiwoomDateVPCrawler {
             List<String> codeList = JdbcQuery.getStringList("SELECT ITEM_CD FROM T_STOCK_ITEM WHERE DELISTING_DT IS NULL AND ITEM_CD NOT IN ( SELECT ITEM_CD FROM T_CRAWLING_KIWOOM_TR WHERE YMD_LAST LIKE '202011%' OR YMD_LAST LIKE '202012%' )");
 
             int index = 0;
-            for(int i=0;i<codeList.size();i++){
+            for(int i=codeList.size()-1;i>=0;i--){
                 String code = codeList.get(i);
                 int nowTime = Integer.parseInt( DateUtil.getDateYmd(System.currentTimeMillis(),"HH") );
                 if(nowTime >= 9 && nowTime <= 16){
@@ -333,7 +332,7 @@ public class KiwoomDateVPCrawler {
                 try {
                     logger.debug("CREDIT code: " + code + " " + ++index + " " + codeList.size());
 
-                    new KiwoomDateVPCrawler().updateSingle(code);
+                    new KiwoomDateCreditCrawler().updateSingle(code);
                 }catch(Exception e){
                     logger.error(ExceptionUtil.getStackTrace(e));
                 }

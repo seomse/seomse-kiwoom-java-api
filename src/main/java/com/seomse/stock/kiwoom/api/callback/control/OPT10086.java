@@ -1,13 +1,5 @@
 package com.seomse.stock.kiwoom.api.callback.control;
 
-import com.seomse.commons.utils.date.DateUtil;
-import com.seomse.jdbc.naming.JdbcNaming;
-import com.seomse.stock.kiwoom.data.no.KiwoomCrawlDailyCheckNo;
-import com.seomse.stock.kiwoom.data.no.KiwoomCrawlDailyPriceNo;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * <pre>
  *  파 일 명 : OPT10080.java

@@ -1,13 +1,6 @@
 package com.seomse.stock.kiwoom.api.callback.control;
 
-import com.seomse.commons.utils.date.DateUtil;
-import com.seomse.jdbc.naming.JdbcNaming;
-import com.seomse.stock.kiwoom.api.KiwoomApiLock;
-import com.seomse.stock.kiwoom.data.no.KiwoomCrawlStatusNo;
-import com.seomse.stock.kiwoom.data.no.KiwoomCrawlDailyPriceNo;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.seomse.stock.kiwoom.api.KiwoomApiCallbackStore;
 
 /**
  * <pre>
@@ -33,6 +26,6 @@ public class OPT10013 extends DefaultCallbackController{
 
     @Override
     public void disposeMessage() {
-        KiwoomApiLock.getInstance().putCallbackData(callbackId,message);
+        KiwoomApiCallbackStore.getInstance().putCallbackData(callbackId,message);
     }
 }

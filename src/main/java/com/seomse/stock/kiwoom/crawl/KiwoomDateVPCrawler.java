@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.seomse.stock.kiwoom.data;
+package com.seomse.stock.kiwoom.crawl;
 
 import com.seomse.commons.service.Service;
 import com.seomse.commons.utils.ExceptionUtil;
@@ -23,9 +23,9 @@ import com.seomse.commons.utils.time.DateUtil;
 import com.seomse.jdbc.JdbcQuery;
 import com.seomse.jdbc.naming.JdbcNaming;
 import com.seomse.stock.kiwoom.KiwoomApiServer;
-import com.seomse.stock.kiwoom.api.KiwoomClientManager;
-import com.seomse.stock.kiwoom.data.no.KiwoomCrawlDailyCreditNo;
-import com.seomse.stock.kiwoom.data.no.KiwoomCrawlStatusNo;
+import com.seomse.stock.kiwoom.api.KiwoomApiSender;
+import com.seomse.stock.kiwoom.crawl.no.KiwoomCrawlDailyCreditNo;
+import com.seomse.stock.kiwoom.crawl.no.KiwoomCrawlStatusNo;
 import com.seomse.stock.kiwoom.process.KiwoomProcess;
 import com.seomse.stock.kiwoom.process.KiwoomProcessMonitorService;
 import org.json.JSONObject;
@@ -38,11 +38,11 @@ import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class KiwoomDateCreditCrawler {
-    private static final Logger logger = getLogger(KiwoomDateCreditCrawler.class);
+public class KiwoomDateVPCrawler {
+    private static final Logger logger = getLogger(KiwoomDateVPCrawler.class);
 
     private String DATE_YMD = "yyyyMMdd";
-    private static final String CRAWL_TYPE = "CREDIT";
+    private static final String CRAWL_TYPE = "VP";
     private static final String DATA_SEPARATOR = "\\|";
     private static final Long CRAWL_SLEEP_TIME = 2000L;
 
@@ -208,10 +208,9 @@ public class KiwoomDateCreditCrawler {
      */
     private CrawlResponse crawlItem(String itemCode, String startDate) {
 
-
         CrawlResponse response = new CrawlResponse(false,"","");
 
-        String dateCreditAllData = KiwoomClientManager.getInstance().getDateCreditData(itemCode, startDate);
+        String dateCreditAllData = KiwoomApiSender.getDateCreditData(itemCode, startDate);
         if(dateCreditAllData == null || dateCreditAllData.length() == 0 || dateCreditAllData.equals("FAIL")){
             return response;
         }
@@ -334,7 +333,7 @@ public class KiwoomDateCreditCrawler {
                 try {
                     logger.debug("CREDIT code: " + code + " " + ++index + " " + codeList.size());
 
-                    new KiwoomDateCreditCrawler().updateSingle(code);
+                    new KiwoomDateVPCrawler().updateSingle(code);
                 }catch(Exception e){
                     logger.error(ExceptionUtil.getStackTrace(e));
                 }

@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.seomse.stock.kiwoom.api;
 
-
-package com.seomse.stock.kiwoom.data;
-
-public class KiwoomMinuteCrawler {
+public class KiwoomApiCallCode {
+    /* 구현된 코드만 기입 */
+    public static String CALL_TR = "KWTR0001";
+    public static String SEND_ORDER = "KWTRD001";
 }

@@ -19,10 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class KiwoomApiLock {
-    private static class SingleTonHolder{ private static final KiwoomApiLock INSTANCE = new KiwoomApiLock();}
-    private KiwoomApiLock(){}
-    public static KiwoomApiLock getInstance(){return SingleTonHolder.INSTANCE;}
+public class KiwoomApiCallbackStore {
+    private static class SingleTonHolder{ private static final KiwoomApiCallbackStore INSTANCE = new KiwoomApiCallbackStore();}
+    private KiwoomApiCallbackStore(){}
+    public static KiwoomApiCallbackStore getInstance(){return SingleTonHolder.INSTANCE;}
     private ReentrantLock lock = new ReentrantLock();
     private Map<String,String> callbackMap = new HashMap<>();
 

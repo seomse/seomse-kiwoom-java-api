@@ -15,14 +15,14 @@
  */
 
 
-package com.seomse.stock.kiwoom.data;
+package com.seomse.stock.kiwoom.crawl;
 
 import com.seomse.commons.service.Service;
 import com.seomse.commons.utils.date.DateUtil;
 import com.seomse.jdbc.JdbcQuery;
 import com.seomse.jdbc.naming.JdbcNaming;
-import com.seomse.stock.kiwoom.api.KiwoomClientManager;
-import com.seomse.stock.kiwoom.data.no.KiwoomCrawlDailyCheckNo;
+import com.seomse.stock.kiwoom.api.KiwoomApiSender;
+import com.seomse.stock.kiwoom.crawl.no.KiwoomCrawlDailyCheckNo;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -37,11 +37,7 @@ public class KiwoomETFCrawler extends Service {
 
     private List<String> itemList = null;
 
-    private KiwoomClientManager clientManager = null;
-
-    public KiwoomETFCrawler(){
-        clientManager = KiwoomClientManager.getInstance();
-    }
+    public KiwoomETFCrawler(){}
 
     @Override
     public void work() {
@@ -92,7 +88,7 @@ public class KiwoomETFCrawler extends Service {
 
     private void crawlItem(String itemCode , String date) {
         logger.debug("itemCode : " + itemCode);
-        clientManager.getDatePriceData(itemCode,date);
+        KiwoomApiSender.getDatePriceData(itemCode,date);
     }
 
     private KiwoomCrawlDailyCheckNo getCheckNo(String itemCode) {
