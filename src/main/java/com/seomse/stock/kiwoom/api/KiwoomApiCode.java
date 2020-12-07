@@ -20,5 +20,5 @@ public class KiwoomApiCode {
     public static String ORDER = "";
     public static String DAILY_STOCK_CREDIT = "OPT10013";
     public static String DAILY_STOCK_INFO = "OPT10086";
-    public static String MINUTE_STOCK_INFO = "OPT10015";
+    public static String DAILY_STRENGTH_INFO = "OPT10047";
 }

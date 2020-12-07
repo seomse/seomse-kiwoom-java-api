@@ -15,16 +15,21 @@
  */
 package com.seomse.stock.kiwoom.api;
 
+import org.slf4j.Logger;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 public class KiwoomApiCallbackStore {
+    private static final Logger logger = getLogger(KiwoomApiCallbackStore.class);
     private static class SingleTonHolder{ private static final KiwoomApiCallbackStore INSTANCE = new KiwoomApiCallbackStore();}
     private KiwoomApiCallbackStore(){}
     public static KiwoomApiCallbackStore getInstance(){return SingleTonHolder.INSTANCE;}
     private ReentrantLock lock = new ReentrantLock();
-    private Map<String,String> callbackMap = new HashMap<>();
+    private Map<String,KiwoomApiCallbackData> callbackMap = new HashMap<>();
 
     /**
      * put callback ID to map
@@ -41,8 +46,9 @@ public class KiwoomApiCallbackStore {
      * @param callbackId
      * @param data
      */
-    public void putCallbackData(String callbackId , String data){
+    public void putCallbackData(String callbackId , KiwoomApiCallbackData data){
         lock.lock();
+        //logger.debug("data:"+data);
         callbackMap.put(callbackId,data);
         lock.unlock();
     }
@@ -53,9 +59,9 @@ public class KiwoomApiCallbackStore {
      * @param callbackId
      * @return
      */
-    public String getCallbackData(String callbackId){
+    public KiwoomApiCallbackData getCallbackData(String callbackId){
         lock.lock();
-        String data = callbackMap.get(callbackId);
+        KiwoomApiCallbackData data = callbackMap.get(callbackId);
         if(data != null){
             callbackMap.remove(callbackId);
         }

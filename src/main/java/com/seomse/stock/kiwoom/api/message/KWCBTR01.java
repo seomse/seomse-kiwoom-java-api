@@ -18,7 +18,8 @@ package com.seomse.stock.kiwoom.api.message;
 
 import com.seomse.api.ApiMessage;
 import com.seomse.commons.utils.ExceptionUtil;
-import com.seomse.stock.kiwoom.api.callback.control.DefaultCallbackController;
+import com.seomse.stock.kiwoom.api.KiwoomApiCallbackData;
+import com.seomse.stock.kiwoom.api.KiwoomApiCallbackStore;
 import com.seomse.system.commons.SystemMessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +37,17 @@ public class KWCBTR01 extends ApiMessage {
             String kiwoomApiCode = message.split(PARAM_SEPARATOR)[0];
             String result = message.substring(kiwoomApiCode.length()+1);
             String callbackId=null,data=null;
+            boolean hasNextData = false;
             if(result.contains(PARAM_SEPARATOR)) {
                 try {
-                    callbackId = result.substring(0, result.lastIndexOf(PARAM_SEPARATOR));
-                    data = result.substring(result.lastIndexOf(PARAM_SEPARATOR) + 1);
+                    callbackId = result.substring(0, result.indexOf(PARAM_SEPARATOR));
+                    result = result.substring(callbackId.length()+1);
+                    String hasNextDataStr = result.substring(0, result.indexOf(PARAM_SEPARATOR));
+                    if(hasNextDataStr.equals("2")){
+                        hasNextData = true;
+                    }
+                    result = result.substring(hasNextDataStr.length()+1);
+                    data = result;
                 } catch(IndexOutOfBoundsException e){
                     logger.error(ExceptionUtil.getStackTrace(e));
                     callbackId = "";
@@ -50,10 +58,12 @@ public class KWCBTR01 extends ApiMessage {
                 data = result;
             }
             logger.debug("CALLBACK Recieved : " + kiwoomApiCode + " data size :  "+data.split("\n").length + "("+callbackId+")");
-            Class<?> callBack = Class.forName(CALLBACK_PACKAGE + "." + kiwoomApiCode);
-            Constructor<?> constructor = callBack.getConstructor(String.class,String.class);
-            DefaultCallbackController defaultCallbackController = (DefaultCallbackController) constructor.newInstance(callbackId,data);
-            defaultCallbackController.disposeMessage();
+//            Class<?> callBack = Class.forName(CALLBACK_PACKAGE + "." + kiwoomApiCode);
+//            Constructor<?> constructor = callBack.getConstructor(String.class,String.class);
+//            DefaultCallbackController defaultCallbackController = (DefaultCallbackController) constructor.newInstance(callbackId,data);
+//            defaultCallbackController.disposeMessage();
+            KiwoomApiCallbackData callbackData = new KiwoomApiCallbackData(kiwoomApiCode,data,hasNextData);
+            KiwoomApiCallbackStore.getInstance().putCallbackData(callbackId,callbackData);
             sendMessage(SystemMessageType.SUCCESS);
         }catch(Exception e){
             logger.error(ExceptionUtil.getStackTrace(e));
