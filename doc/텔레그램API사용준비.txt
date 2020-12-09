@@ -1,0 +1,79 @@
+1. 텔레그램 모바일 또는 웹을 통하여,
+
+검색창에 'BotFather' 을 입력하여 검색합니다.
+
+
+2. 시작 및 새로운 봇을 생성합니다.
+
+
+1) /start 입력
+
+2) /newbot
+
+
+/newbot을 입력하면,
+
+첫번 째 질문으로는 name을 정하라고 나옵니다. 여기서의 name은 중복이 가능하고 변경도 가능하니 편하게 적으시면 됩니다.
+
+두번 째 질문으로는 username을 정하라고 나옵니다. username은 중복이 안됩니다.
+
+그리고, username은 마지막 끝에 '_bot' 또는 'bot'을 붙혀 bot으로 끝나게 만들어야 합니다.
+
+
+3. 토큰번호 생성
+
+
+Use this token to access the HTTP API : 11759~
+
+이 부분이 나의 토큰입니다. 요것을 메모장이나 다른 곳에 저장해두세요.
+
+
+4. 토큰 생성 확인
+
+
+크롬 url 에 자신의 토큰 API 키값을 넣어 접속해보시면,
+
+결과 값으로 {"ok":true,"result":[]} 요런 값이 나온다면 정상입니다.
+
+현재는 아무것도 안했기 때문에 result에 빈값이 생성되는 것입니다.
+
+https://api.telegram.org/bot + 토큰 API 키값 + /getUpdates
+
+
+5. chat_id 확인
+
+
+요기 부분에서 "t.me/kim_ha_bot" 을 클릭하면,
+
+해당 봇과 대화를 할 수 있습니다.
+
+
+
+봇과 대화를 시작하고,
+
+/start 라는 명령어를 입력해줍니다.
+
+
+
+그 후에 다시, 크롬 url 에 자신의 토큰 API 키값을 넣어 접속해보시면,
+
+https://api.telegram.org/bot + 토큰 API 키값 + /getUpdates
+
+
+아래와 같이 출력됩니다.
+
+여기서 id에 입력되 있는 9글자가 chat_id 입니다.
+
+
+
+
+최종 : kiwoom_config에 아래 값 수정
+
+    "telegram_token":"토큰아이디",
+    "telegram_chatid":"채팅창아이디"
+
+사용 : TelegramMessage.toMe("메세지")
+
+주식메세지 : TelegramMessage.toStockMessageToMe(String itemName , int price , int volume , String depositNum , int depositVolume , boolean isSell);
+
+
