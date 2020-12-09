@@ -4,6 +4,6 @@
     "process_name":"KiwoomApi.exe",
     "process_file_path":"C:\workspace\git\seomse-kiwoom-api\KiwoomApi\bin\x86\Debug\KiwoomApi.exe",
     "version_up_file_path":"C:\OpenAPI\OPVersionUp.exe",
-    "telegram_token":"1405493802:AAGNODKnzSyRHiN72IzaUx0GYP4UrLxmemo",
-    "telegram_chatid":"1417951085"
+    "telegram_token":"{YOUR_TOKEN}",
+    "telegram_chatid":"{YOUR_ID}}"
 }
