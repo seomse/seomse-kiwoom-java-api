@@ -30,7 +30,7 @@ public class KiwoomApiSender {
     private static int callbackNumber = 0;
     private static ReentrantLock apiLock = new ReentrantLock();
 
-    private static final int MAX_WAIT_SECONDS = 3;
+    private static final int MAX_WAIT_SECONDS = 10;
 
     /**
      * 일별 데이터를 얻어온다
@@ -71,12 +71,11 @@ public class KiwoomApiSender {
         apiLock.lock();
         String callbackId = (callbackNumber++) + "";
         KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.CALL_TR,KiwoomApiCode.DAILY_STRENGTH_INFO,callbackId),
-                KiwoomApiUtil.makeDataParam(itemCode,continueCode+""),callbackId);
+                KiwoomApiUtil.makeDataParam(itemCode,continueCode+""),callbackId,true);
         apiLock.unlock();
         return apiResult;
 
     }
-
     /**
      * API 를 전송하고 데이터를 얻는다.
      * @param code API 코드
@@ -85,6 +84,16 @@ public class KiwoomApiSender {
      * @return
      */
     private static KiwoomApiCallbackData apiSend(String code , String data , String callbackId) {
+        return apiSend(code,data,callbackId,false);
+    }
+    /**
+     * API 를 전송하고 데이터를 얻는다.
+     * @param code API 코드
+     * @param data API 데이터
+     * @param callbackId 콜백ID
+     * @return
+     */
+    private static KiwoomApiCallbackData apiSend(String code , String data , String callbackId , boolean hasContinueData) {
 
         KiwoomApiCallbackStore.getInstance().putCallbackId(callbackId);
         KiwoomClient kiwoomClient = KiwoomClientManager.getInstance().getClient();
@@ -107,11 +116,14 @@ public class KiwoomApiSender {
             }
             // 설정시간 초과시 키움 API 종료후 재시도.
             if(++tryCount > maxTryCount) {
-
                 KiwoomProcess.rerunKiwoomApi();
-
                 kiwoomClient = KiwoomClientManager.getInstance().getClient();
                 request = kiwoomClient.getRequest();
+
+                if(hasContinueData){
+                    return null;
+                }
+
                 request.sendMessage(code,data);
                 tryCount = 0;
             }

@@ -56,6 +56,7 @@ public class KiwoomDateStrengthCrawler {
         String lastDate;
         String lastTime;
         boolean hasNext=false;
+        boolean isExceptionResult=false;
         List<KiwoomCrawlDailyStrengthNo> chartNoList;
         public CrawlResponse(boolean isSuccess, String lastDate, String lastTime) {
             this.isSuccess = isSuccess;
@@ -63,6 +64,8 @@ public class KiwoomDateStrengthCrawler {
             this.lastTime = lastTime;
         }
 
+        public boolean isExceptionResult() { return isExceptionResult; }
+        public void setExceptionResult(boolean exceptionResult) { isExceptionResult = exceptionResult; }
         public boolean hasNext() {return hasNext;}
         public void setHasNext(boolean hasNext) {this.hasNext = hasNext;}
         public boolean isSuccess() {
@@ -124,7 +127,11 @@ public class KiwoomDateStrengthCrawler {
                 if(!response.hasNext()){
                     break;
                 }
-            } else {
+            } else if( response.isExceptionResult() ){
+                // 오류발생 종료
+                return;
+            }
+            else {
                 // response 가 실패시 종료
                 break;
             }
@@ -214,6 +221,10 @@ public class KiwoomDateStrengthCrawler {
         CrawlResponse response = new CrawlResponse(false,"","");
 
         KiwoomApiCallbackData callbackData = KiwoomApiSender.getDateStrengthData(itemCode, continueCode);
+        if(callbackData == null){
+            response.setExceptionResult(true);
+            return response;
+        }
         String dateStrengthAllData = callbackData.getCallbackData();
         if(dateStrengthAllData.length() == 0 || dateStrengthAllData.equals("FAIL")){
             return response;
