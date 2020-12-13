@@ -155,7 +155,7 @@ public class KiwoomApiSender {
      * @param preOrderNum 원주문번호 : 신규주문에는 공백, 정정(취소)주문할 원주문번호를 입력합니다
      */
     public static KiwoomApiCallbackData sendOrder(String itemCode , String depositNum , String orderType,
-                          int orderCount , int orderPrice , String hoga , String preOrderNum ){
+                                                  int orderCount , int orderPrice , String hoga , String preOrderNum ){
         apiLock.lock();
         String callbackId = (callbackNumber++) + "";
         /*         ///<param name="arg1">계좌번호 : 계좌번호10자리</param>
@@ -169,6 +169,25 @@ public class KiwoomApiSender {
         KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.SEND_ORDER,callbackId),
                 KiwoomApiUtil.makeDataParam(
                         depositNum,orderType,itemCode,orderCount+"",orderPrice+"",hoga,preOrderNum
+                ),callbackId);
+        apiLock.unlock();
+        return apiResult;
+    }
+
+    /**
+     * 주문 실행
+     * @param itemCode 주식코드
+     * @param depositNum 계좌번호 : 계좌번호10자리
+     * @param orderType 주문유형 : 1:신규매수, 2:신규매도
+     * @param orderCount 주문수량 : 주문수량
+     */
+    public static KiwoomApiCallbackData sendMarketPriceOrder(String itemCode , String depositNum , String orderType,
+                                                  int orderCount ){
+        apiLock.lock();
+        String callbackId = (callbackNumber++) + "";
+        KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.SEND_ORDER,callbackId),
+                KiwoomApiUtil.makeDataParam(
+                        depositNum,orderType,itemCode,orderCount+"","0","03",""
                 ),callbackId);
         apiLock.unlock();
         return apiResult;
