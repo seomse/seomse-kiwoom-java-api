@@ -26,9 +26,15 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class KiwoomApiSender {
 
+    private static class SingleTonHolder{ private static final KiwoomApiSender INSTANCE = new KiwoomApiSender();}
+    private KiwoomApiSender(){}
+    public static KiwoomApiSender getInstance(){return SingleTonHolder.INSTANCE;}
+
     private static final Logger logger = getLogger(KiwoomApiSender.class);
-    private static int callbackNumber = 0;
-    private static ReentrantLock apiLock = new ReentrantLock();
+    private int callbackNumber = 0;
+    private ReentrantLock apiLock = new ReentrantLock();
+
+    public ReentrantLock getApiLock() { return apiLock; }
 
     private static final int MAX_WAIT_SECONDS = 10;
 
@@ -37,7 +43,7 @@ public class KiwoomApiSender {
      * @param itemCode 주식코드
      * @param date 날짜 문자열
      */
-    public static void getDatePriceData(String itemCode,String date){
+    public void getDatePriceData(String itemCode,String date){
         apiLock.lock();
         KiwoomClient kiwoomClient = KiwoomClientManager.getInstance().getClient();
         final ApiRequest request = kiwoomClient.getRequest();
@@ -51,7 +57,7 @@ public class KiwoomApiSender {
      * @param date 날짜 문자열
      * @return
      */
-    public static String getDateCreditData(String itemCode , String date){
+    public String getDateCreditData(String itemCode , String date){
         apiLock.lock();
         String callbackId = (callbackNumber++) + "";
         KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.CALL_TR,KiwoomApiCode.DAILY_STOCK_CREDIT,callbackId),
@@ -67,7 +73,7 @@ public class KiwoomApiSender {
      * @param continueCode 연속조회 코드
      * @return
      */
-    public static KiwoomApiCallbackData getDateStrengthData(String itemCode , int continueCode){
+    public KiwoomApiCallbackData getDateStrengthData(String itemCode , int continueCode){
         apiLock.lock();
         String callbackId = (callbackNumber++) + "";
         KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.CALL_TR,KiwoomApiCode.DAILY_STRENGTH_INFO,callbackId),
@@ -83,7 +89,7 @@ public class KiwoomApiSender {
      * @param callbackId 콜백ID
      * @return
      */
-    private static KiwoomApiCallbackData apiSend(String code , String data , String callbackId) {
+    private KiwoomApiCallbackData apiSend(String code , String data , String callbackId) {
         return apiSend(code,data,callbackId,false);
     }
     /**
@@ -93,7 +99,7 @@ public class KiwoomApiSender {
      * @param callbackId 콜백ID
      * @return
      */
-    private static KiwoomApiCallbackData apiSend(String code , String data , String callbackId , boolean hasContinueData) {
+    private KiwoomApiCallbackData apiSend(String code , String data , String callbackId , boolean hasContinueData) {
 
         KiwoomApiCallbackStore.getInstance().putCallbackId(callbackId);
         KiwoomClient kiwoomClient = KiwoomClientManager.getInstance().getClient();
@@ -154,7 +160,7 @@ public class KiwoomApiSender {
      * @param hoga 호가구분 : 00:지정가,03:시장가,05:조건부지정가,06:최유리지정가,07:최우선지정가,10:지정가IOC,13:시장가IOC,16:최유리IOC,20:지정가FOK,23:시장가FOK,26:최유리FOK,61:장전시간외종가,62:시간외단일가매매,81:장후시간외종가
      * @param preOrderNum 원주문번호 : 신규주문에는 공백, 정정(취소)주문할 원주문번호를 입력합니다
      */
-    public static KiwoomApiCallbackData sendOrder(String itemCode , String depositNum , String orderType,
+    public KiwoomApiCallbackData sendOrder(String itemCode , String depositNum , String orderType,
                                                   int orderCount , int orderPrice , String hoga , String preOrderNum ){
         apiLock.lock();
         String callbackId = (callbackNumber++) + "";
@@ -181,7 +187,7 @@ public class KiwoomApiSender {
      * @param orderType 주문유형 : 1:신규매수, 2:신규매도
      * @param orderCount 주문수량 : 주문수량
      */
-    public static KiwoomApiCallbackData sendMarketPriceOrder(String itemCode , String depositNum , String orderType,
+    public KiwoomApiCallbackData sendMarketPriceOrder(String itemCode , String depositNum , String orderType,
                                                   int orderCount ){
         apiLock.lock();
         String callbackId = (callbackNumber++) + "";

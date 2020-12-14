@@ -22,7 +22,7 @@ import com.seomse.commons.utils.FileUtil;
 import com.seomse.commons.utils.time.DateUtil;
 import com.seomse.jdbc.JdbcQuery;
 import com.seomse.jdbc.naming.JdbcNaming;
-import com.seomse.stock.kiwoom.KiwoomApiServer;
+import com.seomse.stock.kiwoom.KiwoomApiStart;
 import com.seomse.stock.kiwoom.api.KiwoomApiSender;
 import com.seomse.stock.kiwoom.crawl.no.KiwoomCrawlDailyCreditNo;
 import com.seomse.stock.kiwoom.crawl.no.KiwoomCrawlStatusNo;
@@ -209,7 +209,7 @@ public class KiwoomDateCreditCrawler {
 
         CrawlResponse response = new CrawlResponse(false,"","");
 
-        String dateCreditAllData = KiwoomApiSender.getDateCreditData(itemCode, startDate);
+        String dateCreditAllData = KiwoomApiSender.getInstance().getDateCreditData(itemCode, startDate);
         if(dateCreditAllData == null || dateCreditAllData.length() == 0 || dateCreditAllData.equals("FAIL")){
             return response;
         }
@@ -300,7 +300,7 @@ public class KiwoomDateCreditCrawler {
         monitorService.setState(Service.State.START);
         monitorService.start();
 
-        KiwoomApiServer apiServer = new KiwoomApiServer(receivePort,sendPort);
+        KiwoomApiStart apiServer = new KiwoomApiStart(receivePort,sendPort);
         apiServer.start();
 
         KiwoomProcess.rerunKiwoomApi();

@@ -48,7 +48,6 @@ public class KiwoomApiCallbackStore {
      */
     public void putCallbackData(String callbackId , KiwoomApiCallbackData data){
         lock.lock();
-        //logger.debug("data:"+data);
         callbackMap.put(callbackId,data);
         lock.unlock();
     }

@@ -15,8 +15,10 @@
  */
 package com.seomse.stock.kiwoom.api;
 
+import com.seomse.commons.utils.ExceptionUtil;
 import com.seomse.commons.utils.FileUtil;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,7 +29,11 @@ import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 public class TelegramMessage {
+    
+    private static final Logger logger = getLogger(TelegramMessage.class);
 
     private static String token = "1405493802:AAGNODKnzSyRHiN72IzaUx0GYP4UrLxmemo";
     private static String chatId = "1417951085";
@@ -75,7 +81,7 @@ public class TelegramMessage {
             }
 
         } catch(Exception e) {
-            e.printStackTrace();
+            logger.error(ExceptionUtil.getStackTrace(e));
         } finally {
             if(in != null) try { in.close(); } catch(Exception e) { e.printStackTrace(); }
             return response.toString();

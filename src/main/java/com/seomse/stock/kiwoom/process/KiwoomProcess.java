@@ -18,6 +18,7 @@ package com.seomse.stock.kiwoom.process;
 import com.seomse.commons.utils.ExceptionUtil;
 import com.seomse.commons.utils.FileUtil;
 import com.seomse.commons.utils.date.DateUtil;
+import com.seomse.stock.kiwoom.api.KiwoomApiSender;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -35,7 +36,7 @@ public class KiwoomProcess {
     private static String apiProcessPath=null;
     private static String apiVersionUpPath=null;
 
-    private static final String TASKLIST = "tasklist";
+    private static final String TASK_PROCESS = "tasklist.exe";
     private static final String KILL = "taskkill /F /IM ";
 
     /**
@@ -56,10 +57,11 @@ public class KiwoomProcess {
      * 이미 실행시, 종료후 실행 한다.
      */
     public static void rerunKiwoomApi(){
+        KiwoomApiSender.getInstance().getApiLock().lock();
         logger.info("checkProcess..");
         new Thread(() -> {
             try {
-                final Process process = new ProcessBuilder("tasklist.exe", "/fo", "csv", "/nh").start();
+                final Process process = new ProcessBuilder(TASK_PROCESS, "/fo", "csv", "/nh").start();
 
                 Scanner sc = new Scanner(process.getInputStream());
                 if (sc.hasNextLine()) sc.nextLine();
@@ -98,18 +100,21 @@ public class KiwoomProcess {
         } catch (InterruptedException e) {
             logger.error(ExceptionUtil.getStackTrace(e));
         }
+        KiwoomApiSender.getInstance().getApiLock().unlock();
     }
 
     /**
      * 키움 API의 버전업을 실행 한다.
      */
     public static void startVersionUp(){
+
+        KiwoomApiSender.getInstance().getApiLock().lock();
+
         String nowYmd = DateUtil.getDateYmd(System.currentTimeMillis(),"yyyy-MM-dd");
         logger.info("startVersionUp process.. ["+nowYmd+"] ");
         try {Thread.sleep(1000l * 60l);} catch (InterruptedException e) {}
-
         try {
-            final Process process = new ProcessBuilder("tasklist.exe", "/fo", "csv", "/nh").start();
+            final Process process = new ProcessBuilder(TASK_PROCESS, "/fo", "csv", "/nh").start();
             new Thread(() -> {
                 Scanner sc = new Scanner(process.getInputStream());
                 if (sc.hasNextLine()) sc.nextLine();
@@ -118,8 +123,13 @@ public class KiwoomProcess {
                     String[] parts = line.split(",");
                     String unq = parts[0].substring(1).replaceFirst(".$", "");
                     if(unq.equals("opversionup.exe")){
-                        if(process.isAlive()){
-                            logger.info("process kill opversionup.exe ["+nowYmd+"] ");
+//                        if(process.isAlive()){
+//                            logger.info("process kill opversionup.exe ["+nowYmd+"] ");
+//                        }
+                        try {
+                            killProcess(unq);
+                        } catch (Exception e) {
+                            logger.error(ExceptionUtil.getStackTrace(e));
                         }
                     }
                 }
@@ -130,6 +140,12 @@ public class KiwoomProcess {
             logger.error(ExceptionUtil.getStackTrace(e));
         }
         ProcessRunner.runProcess(apiVersionUpPath,true);
+        try {
+            Thread.sleep(60000L);
+        } catch (InterruptedException e) {
+            logger.error(ExceptionUtil.getStackTrace(e));
+        }
+        KiwoomApiSender.getInstance().getApiLock().unlock();
     }
 
     /**
@@ -146,5 +162,8 @@ public class KiwoomProcess {
             e.printStackTrace();
         }
 
+    }
+    public static void main(String [] args){
+        startVersionUp();
     }
 }

@@ -91,7 +91,7 @@ public class KiwoomDateCrawler extends Service {
 
     private void crawlItem(String itemCode , String date) {
         logger.debug("itemCode : " + itemCode);
-        KiwoomApiSender.getDatePriceData(itemCode,date);
+        KiwoomApiSender.getInstance().getDatePriceData(itemCode,date);
     }
 
     private KiwoomCrawlDailyCheckNo getCheckNo(String itemCode) {

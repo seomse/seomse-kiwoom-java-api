@@ -21,6 +21,8 @@ import com.seomse.api.server.ApiRequestServer;
 import com.seomse.api.server.ApiServer;
 import com.seomse.commons.utils.date.DateUtil;
 import com.seomse.stock.kiwoom.api.KiwoomClientManager;
+import com.seomse.stock.kiwoom.process.KiwoomProcess;
+import com.seomse.stock.kiwoom.process.KiwoomProcessMonitorService;
 import org.slf4j.Logger;
 
 import java.net.InetAddress;
@@ -28,10 +30,10 @@ import java.net.Socket;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class KiwoomApiServer extends Thread{
-    private static final Logger logger = getLogger(KiwoomApiServer.class);
+public class KiwoomApiStart extends Thread{
+    private static final Logger logger = getLogger(KiwoomApiStart.class);
     int receivePort,sendPort;
-    public KiwoomApiServer(int receivePort , int sendPort){
+    public KiwoomApiStart(int receivePort , int sendPort){
         this.receivePort = receivePort;
         this.sendPort = sendPort;
     }
@@ -44,12 +46,21 @@ public class KiwoomApiServer extends Thread{
             logger.debug("NEW NODE CONNECTED : " + nodeKey);
             KiwoomClientManager.getInstance().addClient(nodeKey,request);
         };
-
+        // Kiwoom API 송신용
         ApiRequestServer apiRequestServer = new ApiRequestServer(sendPort, handler);
         apiRequestServer.start();
 
+        /// Kiwoom API 수신용
         ApiServer apiServer = new ApiServer(receivePort,"com.seomse.stock");
         apiServer.start();
+
+        // 오전 9시 모니터링 시작
+        KiwoomProcessMonitorService monitorService = new KiwoomProcessMonitorService();
+        monitorService.setSleepTime(60000L);
+        monitorService.start();
+        
+        // 키움 프로세스 종료후 재 실행
+        KiwoomProcess.rerunKiwoomApi();
 
         logger.info("START SERVER : " + DateUtil.getDateYmd(System.currentTimeMillis(),"yyyy-MM-dd HH:mm:ss"));
     }

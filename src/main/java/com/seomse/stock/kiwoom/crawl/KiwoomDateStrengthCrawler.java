@@ -22,10 +22,9 @@ import com.seomse.commons.utils.FileUtil;
 import com.seomse.commons.utils.time.DateUtil;
 import com.seomse.jdbc.JdbcQuery;
 import com.seomse.jdbc.naming.JdbcNaming;
-import com.seomse.stock.kiwoom.KiwoomApiServer;
+import com.seomse.stock.kiwoom.KiwoomApiStart;
 import com.seomse.stock.kiwoom.api.KiwoomApiCallbackData;
 import com.seomse.stock.kiwoom.api.KiwoomApiSender;
-import com.seomse.stock.kiwoom.crawl.no.KiwoomCrawlDailyCreditNo;
 import com.seomse.stock.kiwoom.crawl.no.KiwoomCrawlDailyStrengthNo;
 import com.seomse.stock.kiwoom.crawl.no.KiwoomCrawlStatusNo;
 import com.seomse.stock.kiwoom.process.KiwoomProcess;
@@ -35,7 +34,6 @@ import org.slf4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -220,7 +218,7 @@ public class KiwoomDateStrengthCrawler {
 
         CrawlResponse response = new CrawlResponse(false,"","");
 
-        KiwoomApiCallbackData callbackData = KiwoomApiSender.getDateStrengthData(itemCode, continueCode);
+        KiwoomApiCallbackData callbackData = KiwoomApiSender.getInstance().getDateStrengthData(itemCode, continueCode);
         if(callbackData == null){
             response.setExceptionResult(true);
             return response;
@@ -293,7 +291,7 @@ public class KiwoomDateStrengthCrawler {
         monitorService.setState(Service.State.START);
         monitorService.start();
 
-        KiwoomApiServer apiServer = new KiwoomApiServer(receivePort,sendPort);
+        KiwoomApiStart apiServer = new KiwoomApiStart(receivePort,sendPort);
         apiServer.start();
 
         KiwoomProcess.rerunKiwoomApi();
