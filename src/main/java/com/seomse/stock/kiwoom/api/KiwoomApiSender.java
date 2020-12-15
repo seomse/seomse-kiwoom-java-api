@@ -154,14 +154,14 @@ public class KiwoomApiSender {
     /**
      * 주문 실행
      * @param itemCode 주식코드
-     * @param depositNum 계좌번호 : 계좌번호10자리
+     * @param accountNumber 계좌번호 : 계좌번호10자리
      * @param orderType 주문유형 : 1:신규매수, 2:신규매도 3:매수취소, 4:매도취소, 5:매수정정, 6:매도정정
      * @param orderCount 주문수량 : 주문수량
      * @param orderPrice 주문가격 : 주문가격
      * @param hoga 호가구분 : 00:지정가,03:시장가,05:조건부지정가,06:최유리지정가,07:최우선지정가,10:지정가IOC,13:시장가IOC,16:최유리IOC,20:지정가FOK,23:시장가FOK,26:최유리FOK,61:장전시간외종가,62:시간외단일가매매,81:장후시간외종가
      * @param preOrderNum 원주문번호 : 신규주문에는 공백, 정정(취소)주문할 원주문번호를 입력합니다
      */
-    public KiwoomApiCallbackData sendOrder(String itemCode , String depositNum , String orderType,
+    public KiwoomApiCallbackData sendOrder(String itemCode , String accountNumber , String orderType,
                                                   int orderCount , int orderPrice , String hoga , String preOrderNum ){
         apiLock.lock();
         String callbackId = (callbackNumber++) + "";
@@ -175,7 +175,7 @@ public class KiwoomApiSender {
          */
         KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.SEND_ORDER,callbackId),
                 KiwoomApiUtil.makeDataParam(
-                        depositNum,orderType,itemCode,orderCount+"",orderPrice+"",hoga,preOrderNum
+                        accountNumber,orderType,itemCode,orderCount+"",orderPrice+"",hoga,preOrderNum
                 ),callbackId);
         apiLock.unlock();
         return apiResult;
@@ -184,26 +184,40 @@ public class KiwoomApiSender {
     /**
      * 주문 실행
      * @param itemCode 주식코드
-     * @param depositNum 계좌번호 : 계좌번호10자리
+     * @param accountNumber 계좌번호 : 계좌번호10자리
      * @param orderType 주문유형 : 1:신규매수, 2:신규매도
      * @param orderCount 주문수량 : 주문수량
      */
-    public KiwoomApiCallbackData sendMarketPriceOrder(String itemCode , String depositNum , String orderType,
+    public KiwoomApiCallbackData sendMarketPriceOrder(String itemCode , String accountNumber , String orderType,
                                                   int orderCount ){
         apiLock.lock();
         String callbackId = (callbackNumber++) + "";
         KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.SEND_ORDER,callbackId),
                 KiwoomApiUtil.makeDataParam(
-                        depositNum,orderType,itemCode,orderCount+"","0","03",""
+                        accountNumber,orderType,itemCode,orderCount+"","0","03",""
                 ),callbackId);
         apiLock.unlock();
         return apiResult;
     }
+
+    public KiwoomApiCallbackData getAccountDetail(String accountNumber) {
+        apiLock.lock();
+        String callbackId = (callbackNumber++) + "";
+        KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.CALL_TR,KiwoomApiCode.ACCOUNT_DETAIL,callbackId),
+                KiwoomApiUtil.makeDataParam(accountNumber,"","00","1"),callbackId,true);
+        apiLock.unlock();
+        return apiResult;
+    }
+
+
+
     public static void main(String [] args){
 
         Thread t = new KiwoomApiStart(33333,33334);
         t.start();
 
-        KiwoomApiSender.getInstance().sendMarketPriceOrder("048550","4550089011","1",1);
+//        KiwoomApiSender.getInstance().sendMarketPriceOrder("048550","4550089011","1",1);
+        KiwoomApiCallbackData accountDetail = KiwoomApiSender.getInstance().getAccountDetail("4550089011");
+        System.out.println(accountDetail.getCallbackData());
     }
 }

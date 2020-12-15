@@ -17,8 +17,9 @@ package com.seomse.stock.kiwoom.api;
 
 public class KiwoomApiCode {
     /* 구현된 코드만 기입 */
-    public static String ORDER = "";
     public static String DAILY_STOCK_CREDIT = "OPT10013";
     public static String DAILY_STOCK_INFO = "OPT10086";
     public static String DAILY_STRENGTH_INFO = "OPT10047";
+
+    public static String ACCOUNT_DETAIL = "OPW00001";
 }
