@@ -17,6 +17,7 @@ package com.seomse.stock.kiwoom.api;
 
 import com.seomse.api.ApiRequest;
 import com.seomse.commons.utils.ExceptionUtil;
+import com.seomse.stock.kiwoom.KiwoomApiStart;
 import com.seomse.stock.kiwoom.process.KiwoomProcess;
 import org.slf4j.Logger;
 
@@ -198,5 +199,11 @@ public class KiwoomApiSender {
         apiLock.unlock();
         return apiResult;
     }
+    public static void main(String [] args){
 
+        Thread t = new KiwoomApiStart(33333,33334);
+        t.start();
+
+        KiwoomApiSender.getInstance().sendMarketPriceOrder("048550","4550089011","1",1);
+    }
 }

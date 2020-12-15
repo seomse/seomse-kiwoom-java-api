@@ -26,7 +26,6 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class KiwoomClientManager {
-    private static final ReentrantLock lock = new ReentrantLock();
     private static final Logger logger = LoggerFactory.getLogger(KiwoomClientManager.class);
     private static class SingleTonHolder{ private static final KiwoomClientManager INSTANCE = new KiwoomClientManager();}
     private KiwoomClientManager(){}
@@ -36,21 +35,22 @@ public class KiwoomClientManager {
 
 
     public void addClient(String clientId, ApiRequest request){
-        lock.lock();
         KiwoomClient newClient = new KiwoomClient(clientId , request);
-        this.client = newClient;
-        lock.unlock();
+        if(newClient != null) {
+            logger.debug("set new Client : " + clientId);
+            this.client = newClient;
+        } else {
+            logger.debug("set new Client fail! ");
+        }
     }
 
     public KiwoomClient getClient() {
-        lock.lock();
         while(true) {
             KiwoomClient kiwoomClient = this.client;
             if (kiwoomClient == null) {
                 logger.error("kiwoomClient is null");
                 KiwoomProcess.rerunKiwoomApi();
             } else {
-                lock.unlock();
                 return kiwoomClient;
             }
         }
