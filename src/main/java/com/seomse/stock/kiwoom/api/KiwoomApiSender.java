@@ -209,6 +209,15 @@ public class KiwoomApiSender {
         return apiResult;
     }
 
+    public KiwoomApiCallbackData getAccountItemDetail(String accountNumber) {
+        apiLock.lock();
+        String callbackId = (callbackNumber++) + "";
+        KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.CALL_TR,KiwoomApiCode.ACCOUNT_ITEM_DETAIL,callbackId),
+                KiwoomApiUtil.makeDataParam(accountNumber,"","0","00"),callbackId,true);
+        apiLock.unlock();
+        return apiResult;
+    }
+
 
 
     public static void main(String [] args){
@@ -217,7 +226,7 @@ public class KiwoomApiSender {
         t.start();
 
 //        KiwoomApiSender.getInstance().sendMarketPriceOrder("048550","4550089011","1",1);
-        KiwoomApiCallbackData accountDetail = KiwoomApiSender.getInstance().getAccountDetail("4550089011");
+        KiwoomApiCallbackData accountDetail = KiwoomApiSender.getInstance().getAccountItemDetail("4550089011");
         System.out.println(accountDetail.getCallbackData());
     }
 }
