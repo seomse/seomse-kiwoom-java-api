@@ -60,7 +60,7 @@ public class KiwoomApiStart extends Thread{
         monitorService.start();
         
         // 키움 프로세스 종료후 재 실행
-        KiwoomProcess.rerunKiwoomApi();
+        //KiwoomProcess.rerunKiwoomApi();
 
         logger.info("START SERVER : " + DateUtil.getDateYmd(System.currentTimeMillis(),"yyyy-MM-dd HH:mm:ss"));
     }
