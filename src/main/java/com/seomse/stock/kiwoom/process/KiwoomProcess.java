@@ -38,6 +38,7 @@ public class KiwoomProcess {
 
     private static final String TASK_PROCESS = "tasklist.exe";
     private static final String KILL = "taskkill /F /IM ";
+    private static final String VERSION_PROCESS = "opversionup.exe";
 
     /**
      * CONFIG 설정
@@ -104,6 +105,37 @@ public class KiwoomProcess {
     }
 
     /**
+     * 키움 API 를 종료 한다.
+     */
+    public static void killKiwoomApi(){
+        new Thread(() -> {
+            try {
+                final Process process = new ProcessBuilder(TASK_PROCESS, "/fo", "csv", "/nh").start();
+
+                Scanner sc = new Scanner(process.getInputStream());
+                if (sc.hasNextLine()) sc.nextLine();
+                while (sc.hasNextLine()) {
+                    String line = sc.nextLine();
+                    String[] parts = line.split(",");
+                    String unq = parts[0].substring(1).replaceFirst(".$", "");
+                    if(unq.equalsIgnoreCase(apiProcessName)){
+                        try {
+                            killProcess(unq);
+                            try {
+                                Thread.sleep(1000L);
+                            } catch (InterruptedException e) {
+                                logger.error(ExceptionUtil.getStackTrace(e));
+                            }
+                        } catch (Exception e) {
+                            logger.error(ExceptionUtil.getStackTrace(e));
+                        }
+                    }
+                }
+            }catch (IOException e) {}
+        }).start();
+    }
+
+    /**
      * 키움 API의 버전업을 실행 한다.
      */
     public static void startVersionUp(){
@@ -122,10 +154,7 @@ public class KiwoomProcess {
                     String line = sc.nextLine();
                     String[] parts = line.split(",");
                     String unq = parts[0].substring(1).replaceFirst(".$", "");
-                    if(unq.equals("opversionup.exe")){
-//                        if(process.isAlive()){
-//                            logger.info("process kill opversionup.exe ["+nowYmd+"] ");
-//                        }
+                    if(unq.equals(VERSION_PROCESS)){
                         try {
                             killProcess(unq);
                         } catch (Exception e) {

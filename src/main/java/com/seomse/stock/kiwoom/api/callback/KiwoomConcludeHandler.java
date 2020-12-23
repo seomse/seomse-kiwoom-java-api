@@ -13,19 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.seomse.stock.kiwoom.account;
+package com.seomse.stock.kiwoom.api.callback;
 
-import com.seomse.stock.kiwoom.KiwoomApiStart;
-import com.seomse.stock.kiwoom.api.KiwoomApiSender;
-
-public class KiwoomAccount {
-    private String accountNumber;
-    public static void main(String [] args){
-
-        KiwoomApiStart apiServer = new KiwoomApiStart(33333,33334);
-        apiServer.start();
-
-        //KiwoomApiSender.getInstance().getAccountDetail()
-
-    }
+public interface KiwoomConcludeHandler {
+    /**
+     * 계약 체결
+     * @param concludeData
+     */
+    public void conclude(KiwoomConcludeData concludeData);
 }

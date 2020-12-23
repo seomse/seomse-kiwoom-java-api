@@ -39,6 +39,8 @@ public class KiwoomApiSender {
 
     private static final int MAX_WAIT_SECONDS = 10;
 
+
+
     /**
      * 일별 데이터를 얻어온다
      * @param itemCode 주식코드
