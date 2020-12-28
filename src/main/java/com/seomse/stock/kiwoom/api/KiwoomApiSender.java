@@ -18,6 +18,8 @@ package com.seomse.stock.kiwoom.api;
 import com.seomse.api.ApiRequest;
 import com.seomse.commons.utils.ExceptionUtil;
 import com.seomse.stock.kiwoom.KiwoomApiStart;
+import com.seomse.stock.kiwoom.api.callback.KiwoomConcludeData;
+import com.seomse.stock.kiwoom.api.callback.KiwoomConcludeHandler;
 import com.seomse.stock.kiwoom.process.KiwoomProcess;
 import org.slf4j.Logger;
 
@@ -228,6 +230,54 @@ public class KiwoomApiSender {
 
         Thread t = new KiwoomApiStart(33333,33334);
         t.start();
+        /**
+         *     String depositNumber;
+         *     String orderNumber;
+         *     String itemCode;
+         *     String itemName;
+         *     int orderCount;
+         *     int orderPrice;
+         *     String tradeType;
+         *     String concludeTime;
+         *     String concludeNumber;
+         *     int concludePrice;
+         *     int concludeCount;
+         *     String orderStatus;
+         */
+        KiwoomConcludeReceiver.getInstance().addHandler(concludeData -> {
+            System.out.println(
+                    """
+                       ###################
+                       계약체결 확정!
+                       계좌번호 : "%s"
+                       주분번호 : "%s"
+                       종목코드 : "%s"
+                       종목명 : "%s"
+                       주문수량 : "%s"
+                       주문가격 : "%s"
+                       주문구분 : "%s"
+                       체결시간 : "%s"
+                       체결번호 : "%s"
+                       체결가격 : "%s"
+                       체결수량 : "%s"
+                       예수금 : "%s"   
+                       ###################                         
+                    """.formatted(
+                            concludeData.getDepositNumber(),
+                            concludeData.getConcludeNumber(),
+                            concludeData.getItemCode(),
+                            concludeData.getItemName(),
+                            concludeData.getOrderCount(),
+                            concludeData.getOrderPrice(),
+                            concludeData.getTradeType(),
+                            concludeData.getConcludeTime(),
+                            concludeData.getConcludeNumber(),
+                            concludeData.getConcludePrice(),
+                            concludeData.getConcludeCount(),
+                            concludeData.getDepositVolume()
+                    )
+            );
+        });
 
         KiwoomApiCallbackData kiwoomApiCallbackData = KiwoomApiSender.getInstance().sendMarketPriceOrder("048550", "4550089011", "2", 1);
 
@@ -235,10 +285,9 @@ public class KiwoomApiSender {
 
         try {Thread.sleep(10000L);} catch (InterruptedException e) {}
 
-        kiwoomApiCallbackData = KiwoomApiSender.getInstance().sendMarketPriceOrder("048550", "4550089011", "2", 1);
+        kiwoomApiCallbackData = KiwoomApiSender.getInstance().sendMarketPriceOrder("048550", "4550089011", "1", 1);
 
         System.out.println("[2] "+kiwoomApiCallbackData.getCallbackCode() + " : " + kiwoomApiCallbackData.getCallbackData());
-
 
 //        KiwoomApiCallbackData accountDetail = KiwoomApiSender.getInstance().getAccountItemDetail("4550089011");
 //        System.out.println(accountDetail.getCallbackData());

@@ -43,7 +43,7 @@ public class KiwoomConcludeData {
     String concludeNumber;
     int concludePrice;
     int concludeCount;
-    String orderStatus;
+    int depositVolume;
 
     /**
      * 계좌번호
@@ -135,7 +135,7 @@ public class KiwoomConcludeData {
 
     /**
      * 주문가격
-     * @param oderPrice
+     * @param orderPrice
      */
     public void setOrderPrice(int orderPrice) {
         this.orderPrice = orderPrice;
@@ -222,18 +222,18 @@ public class KiwoomConcludeData {
     }
 
     /**
-     * 주문상태
-     * @return String
+     * 예수금
+     * @return int
      */
-    public String getOrderStatus() {
-        return orderStatus;
+    public int getDepositVolume() {
+        return depositVolume;
     }
 
     /**
-     * 주문상태
-     * @param orderStatus
+     * 예수금
+     * @param depositVolume
      */
-    public void setOrderStatus(String orderStatus) {
-        this.orderStatus = orderStatus;
+    public void setDepositVolume(int depositVolume) {
+        this.depositVolume = depositVolume;
     }
 }

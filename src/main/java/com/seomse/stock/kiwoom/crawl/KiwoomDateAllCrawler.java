@@ -50,7 +50,7 @@ public class KiwoomDateAllCrawler {
             int nowTime = Integer.parseInt(DateUtil.getDateYmd(System.currentTimeMillis(),"HH"));
             String nowDate = DateUtil.getDateYmd(System.currentTimeMillis(),"yyyy-MM-dd");
             logger.debug("nowTime:"+nowTime+"");
-            if(nowTime <= 4) {
+            if(nowTime <= 24) {
 
 
                 KiwoomApiStart apiServer = new KiwoomApiStart(receivePort,sendPort);
@@ -66,6 +66,11 @@ public class KiwoomDateAllCrawler {
                         [%s] KIWOOM ALL DATE CRAWL END!
                         """.formatted(nowDate));
                 KiwoomProcess.killKiwoomApi();
+                try {
+                    Thread.sleep(1000L * 60L * 60L * 10L);
+                } catch (InterruptedException e) {
+                    logger.error(ExceptionUtil.getStackTrace(e));
+                }
             } else {
                 // 10분 대기
                 try {

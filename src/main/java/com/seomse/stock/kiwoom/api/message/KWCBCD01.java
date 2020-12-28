@@ -42,7 +42,7 @@ public class KWCBCD01 extends ApiMessage {
 
         try{
             String data = message;
-
+            System.out.println(message);
             logger.debug("CALLBACK Recieved : KWCBCD01 data size :  "+data.split("\n").length);
             /**
              *
@@ -53,7 +53,7 @@ public class KWCBCD01 extends ApiMessage {
              3  "302" : "종목명"
              4  "900" : "주문수량"
              5  "901" : "주문가격"
-             6  "906" : "매매구분"
+             6  "905" : "주문구분"
              7  "908" : "주문/체결시간"
              8  "909" : "체결번호"
              9  "910" : "체결가"
@@ -75,15 +75,15 @@ public class KWCBCD01 extends ApiMessage {
                     case 8 -> concludeData.setConcludeNumber(dataArr[i]);
                     case 9 -> concludeData.setConcludePrice(Integer.parseInt(dataArr[i]));
                     case 10 -> concludeData.setConcludeCount(Integer.parseInt(dataArr[i]));
-                    case 11 -> concludeData.setOrderStatus(dataArr[i]);
+                    case 11 -> concludeData.setDepositVolume(Integer.parseInt(dataArr[i]));
                 }
             }
             KiwoomConcludeReceiver.getInstance().concludeEventReceive(concludeData);
             if(telegramAlertUse){
                 TelegramMessage.toStockMessageToMe(
                         concludeData.getItemName(),concludeData.getConcludePrice(),concludeData.getConcludeCount(),
-                        concludeData.getDepositNumber(),0,
-                        concludeData.getTradeType().equals("1")
+                        concludeData.getDepositNumber(),concludeData.getDepositVolume(),
+                        concludeData.getTradeType().equals("2")
                 );
             }
         }catch(Exception e){
