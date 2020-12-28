@@ -15,32 +15,37 @@
  */
 
 import com.seomse.commons.file.FileUtil;
+import com.seomse.stock.kiwoom.KiwoomApiStart;
+import com.seomse.stock.kiwoom.account.KiwoomAccount;
+import com.seomse.stock.kiwoom.account.KiwoomItem;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Test {
     public static void main(String [] args){
-        List<String> fileContentsList = FileUtil.getFileContentsList(new File("config/test"), "UTF-8");
-        List<Integer> lineList = new ArrayList<>();
-        for (int i=0; i<fileContentsList.size();i++) {
-            String line = fileContentsList.get(i);
-            if(line.contains("callbackID")){
-                lineList.add(i+1);
-            }
+        KiwoomApiStart kiwoomApiStart = new KiwoomApiStart(33333,33334);
+        kiwoomApiStart.start();
+
+
+        System.out.println("계좌번호:"+ KiwoomAccount.getInstance().getAccountNumber());
+        System.out.println("예수금:"+KiwoomAccount.getInstance().getReadyPrice());
+        System.out.println("평가액:"+KiwoomAccount.getInstance().getValuePrice());
+
+        Map<String, KiwoomItem> codeKiwoomItemMap = KiwoomAccount.getInstance().getCodeKiwoomItemMap();
+        for (String s : codeKiwoomItemMap.keySet()) {
+            KiwoomItem kiwoomItem = codeKiwoomItemMap.get(s);
+            System.out.println("####################################");
+            System.out.println("\t종목코드:"+kiwoomItem.getItemCode());
+            System.out.println("\t종목명:"+kiwoomItem.getItemName());
+            System.out.println("\t종목수량:"+kiwoomItem.getItemCount());
+            System.out.println("\t평단가:"+kiwoomItem.getAvgPrice());
+            System.out.println("\t평가액:"+kiwoomItem.getValuePriceTotal());
+            System.out.println("\t손익액:"+kiwoomItem.getProfitLossPriceTotal());
         }
-        for (int i=0; i<fileContentsList.size();i++) {
-            String line = fileContentsList.get(i);
-            FileUtil.fileOutput(line+"\n","config/test2",true);
-            if(lineList.contains(i)){
-                FileUtil.fileOutput("\t\t\tnowCallbackID=callbackID;\n","config/test2",true);
-            }
 
-        }
-
-
-
-
+//        System.out.println();
     }
 }
