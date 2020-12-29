@@ -224,7 +224,20 @@ public class KiwoomApiSender {
         return apiResult;
     }
 
-
+    /**
+     * 일별 신용 정보를 얻어온다
+     * @param itemCode 일별 코드
+     * @param continueCode 연속조회 코드
+     * @return
+     */
+    public KiwoomApiCallbackData getMinuteData(String itemCode , int continueCode){
+        apiLock.lock();
+        String callbackId = (callbackNumber++) + "";
+        KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.CALL_TR,KiwoomApiCode.MINUTE_CHART_DATA,callbackId),
+                KiwoomApiUtil.makeDataParam(itemCode,continueCode+""),callbackId,true);
+        apiLock.unlock();
+        return apiResult;
+    }
 
     public static void main(String [] args){
 
