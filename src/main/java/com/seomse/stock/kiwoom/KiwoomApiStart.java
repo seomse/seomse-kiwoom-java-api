@@ -20,7 +20,11 @@ import com.seomse.api.server.ApiRequestConnectHandler;
 import com.seomse.api.server.ApiRequestServer;
 import com.seomse.api.server.ApiServer;
 import com.seomse.commons.utils.date.DateUtil;
+import com.seomse.stock.kiwoom.account.KiwoomAccount;
+import com.seomse.stock.kiwoom.api.KiwoomApiCallbackData;
+import com.seomse.stock.kiwoom.api.KiwoomApiSender;
 import com.seomse.stock.kiwoom.api.KiwoomClientManager;
+import com.seomse.stock.kiwoom.config.KiwoomConfig;
 import com.seomse.stock.kiwoom.process.KiwoomProcess;
 import com.seomse.stock.kiwoom.process.KiwoomProcessMonitorService;
 import org.slf4j.Logger;
@@ -62,6 +66,12 @@ public class KiwoomApiStart extends Thread{
         // 키움 프로세스 종료후 재 실행
         //KiwoomProcess.rerunKiwoomApi();
 
-        logger.info("START SERVER : " + DateUtil.getDateYmd(System.currentTimeMillis(),"yyyy-MM-dd HH:mm:ss"));
+        // 계좌정보 업데이트
+        String accountNumber = KiwoomConfig.getConfig( KiwoomConfig.ACCOUNT_NUMBER );
+        if(accountNumber!=null){
+            KiwoomApiCallbackData accountDetail = KiwoomApiSender.getInstance().getAccountDetail(accountNumber);
+            KiwoomAccount.getInstance().parseAccountInfoText(accountNumber,accountDetail.getCallbackData());
+        }
+        logger.debug("START SERVER : " + DateUtil.getDateYmd(System.currentTimeMillis(),"yyyy-MM-dd HH:mm:ss"));
     }
 }

@@ -48,6 +48,7 @@ public class KiwoomApiSender {
      * @param itemCode 주식코드
      * @param date 날짜 문자열
      */
+    @Deprecated
     public void getDatePriceData(String itemCode,String date){
         apiLock.lock();
         KiwoomClient kiwoomClient = KiwoomClientManager.getInstance().getClient();
@@ -149,6 +150,7 @@ public class KiwoomApiSender {
      * @param itemCode
      * @param date
      */
+    @Deprecated
     public void getMinuteData(String itemCode,String date){
         apiLock.lock();
         KiwoomClient kiwoomClient = KiwoomClientManager.getInstance().getClient();
@@ -206,20 +208,16 @@ public class KiwoomApiSender {
         return apiResult;
     }
 
+    /**
+     * 계좌상세현황요청
+     * @param accountNumber
+     * @return
+     */
     public KiwoomApiCallbackData getAccountDetail(String accountNumber) {
         apiLock.lock();
         String callbackId = (callbackNumber++) + "";
-        KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.CALL_TR,KiwoomApiCode.ACCOUNT_DETAIL,callbackId),
-                KiwoomApiUtil.makeDataParam(accountNumber,"","00","1"),callbackId,true);
-        apiLock.unlock();
-        return apiResult;
-    }
-
-    public KiwoomApiCallbackData getAccountItemDetail(String accountNumber) {
-        apiLock.lock();
-        String callbackId = (callbackNumber++) + "";
         KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.CALL_TR,KiwoomApiCode.ACCOUNT_ITEM_DETAIL,callbackId),
-                KiwoomApiUtil.makeDataParam(accountNumber,"","0","00"),callbackId,true);
+                KiwoomApiUtil.makeDataParam(accountNumber,"","00","1"),callbackId,true);
         apiLock.unlock();
         return apiResult;
     }
