@@ -19,6 +19,7 @@ package com.seomse.stock.kiwoom;
 import com.seomse.api.server.ApiRequestConnectHandler;
 import com.seomse.api.server.ApiRequestServer;
 import com.seomse.api.server.ApiServer;
+import com.seomse.commons.utils.ExceptionUtil;
 import com.seomse.commons.utils.date.DateUtil;
 import com.seomse.stock.kiwoom.account.KiwoomAccount;
 import com.seomse.stock.kiwoom.api.KiwoomApiCallbackData;
@@ -40,6 +41,20 @@ public class KiwoomApiStart extends Thread{
     public KiwoomApiStart(int receivePort , int sendPort){
         this.receivePort = receivePort;
         this.sendPort = sendPort;
+    }
+
+
+    boolean isComplete = false;
+
+    public void runAndWait(){
+        run();
+        while(!isComplete){
+            try {
+                Thread.sleep(100L);
+            } catch (InterruptedException e) {
+                logger.error(ExceptionUtil.getStackTrace(e));
+            }
+        }
     }
     @Override
     public void run(){
@@ -73,5 +88,6 @@ public class KiwoomApiStart extends Thread{
             KiwoomAccount.getInstance().parseAccountInfoText(accountNumber,accountDetail.getCallbackData());
         }
         logger.debug("START SERVER : " + DateUtil.getDateYmd(System.currentTimeMillis(),"yyyy-MM-dd HH:mm:ss"));
+        isComplete = true;
     }
 }

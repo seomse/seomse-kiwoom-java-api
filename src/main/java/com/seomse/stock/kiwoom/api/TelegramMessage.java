@@ -17,6 +17,7 @@ package com.seomse.stock.kiwoom.api;
 
 import com.seomse.commons.utils.ExceptionUtil;
 import com.seomse.commons.utils.FileUtil;
+import com.seomse.stock.kiwoom.config.KiwoomConfig;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -38,12 +39,8 @@ public class TelegramMessage {
     private static String token = "1405493802:AAGNODKnzSyRHiN72IzaUx0GYP4UrLxmemo";
     private static String chatId = "1417951085";
     static {
-        String fileContents = FileUtil.getFileContents(new File("config/kiwoom_config"), "UTF-8");
-        fileContents = fileContents.replace("\\\\","\\");
-        fileContents = fileContents.replace("\\","\\\\");
-        JSONObject jsonObject = new JSONObject(fileContents);
-        token = jsonObject.getString("telegram_token");
-        chatId = jsonObject.getString("telegram_chatid");;
+        token = KiwoomConfig.getConfig(KiwoomConfig.TELEGRAM_TOKEN);
+        chatId = KiwoomConfig.getConfig(KiwoomConfig.TELEGRAM_CHAT_ID);
     }
 
     /**

@@ -45,13 +45,17 @@ public class KiwoomConfig {
     public static final String TELEGRAM_ALERT_USE="telegram_alert_use";
     public static final String ACCOUNT_NUMBER="account_number";
 
+
     static JSONObject jsonObject;
     static String configPath = "config/kiwoom_config";
     static {
-        String fileContents = FileUtil.getFileContents(new File(configPath), "UTF-8");
-        fileContents = fileContents.replace("\\\\","\\");
-        fileContents = fileContents.replace("\\","\\\\");
-        jsonObject = new JSONObject(fileContents);
+        File file = new File(configPath);
+        if(file.exists()){
+            String fileContents = FileUtil.getFileContents(file, "UTF-8");
+            fileContents = fileContents.replace("\\\\","\\");
+            fileContents = fileContents.replace("\\","\\\\");
+            jsonObject = new JSONObject(fileContents);
+        }
     }
 
     /**

@@ -146,20 +146,6 @@ public class KiwoomApiSender {
 
 
     /**
-     * 분별 정보를 얻어온다.
-     * @param itemCode
-     * @param date
-     */
-    @Deprecated
-    public void getMinuteData(String itemCode,String date){
-        apiLock.lock();
-        KiwoomClient kiwoomClient = KiwoomClientManager.getInstance().getClient();
-        final ApiRequest request = kiwoomClient.getRequest();
-        //request.sendMessage(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.CALL_TR,KiwoomApiCode.MINUTE_STOCK_INFO),KiwoomApiUtil.makeDataParam(itemCode,date));
-        apiLock.unlock();
-    }
-
-    /**
      * 주문 실행
      * @param itemCode 주식코드
      * @param accountNumber 계좌번호 : 계좌번호10자리
@@ -223,16 +209,18 @@ public class KiwoomApiSender {
     }
 
     /**
-     * 일별 신용 정보를 얻어온다
-     * @param itemCode 일별 코드
-     * @param continueCode 연속조회 코드
-     * @return
+     * 현재 분봉 정보를 얻어온다
+     * @param itemCode
+     * @param minuteType 틱범위 : 1:1분, 3:3분, 5:5분, 10:10분, 15:15분, 30:30분, 45:45분, 60:60분
+     * @param chartType 수정주가구분 : 0 or 1, 수신데이터 1:유상증자, 2:무상증자, 4:배당락, 8:액면분할, 16:액면병합, 32:기업합병, 64:감자, 256:권리락
+     * @return 현재가 / 거래량 / 체결시간 / 시가 / 고가 / 저가 / 그외 나머지 데이터 빈값
+     *         숫자앞 +/- 기호 => 상승/하락의 표기뿐, 지워서 숫자값만 사용 해야 함
      */
-    public KiwoomApiCallbackData getMinuteData(String itemCode , int continueCode){
+    public KiwoomApiCallbackData getMinuteData(String itemCode , int minuteType , int chartType ){
         apiLock.lock();
         String callbackId = (callbackNumber++) + "";
         KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.CALL_TR,KiwoomApiCode.MINUTE_CHART_DATA,callbackId),
-                KiwoomApiUtil.makeDataParam(itemCode,continueCode+""),callbackId,true);
+                KiwoomApiUtil.makeDataParam(itemCode,minuteType+"",chartType+""),callbackId,true);
         apiLock.unlock();
         return apiResult;
     }

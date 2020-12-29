@@ -102,7 +102,7 @@ public class KiwoomAccount {
      * 코드별 보유수량 (간편)
      * @return
      */
-    public Integer getCodeReserveMap(String itemCode) {
+    public Integer getCodeReserve(String itemCode) {
         lock.lock();
         Integer result = codeReserveMap.get(itemCode);
         lock.unlock();
@@ -114,7 +114,7 @@ public class KiwoomAccount {
      * @param itemCode String
      * @param reserveCount int
      */
-    public void putCodeReserveMap(String itemCode , int reserveCount) {
+    public void putCodeReserve(String itemCode , int reserveCount) {
         lock.lock();
         codeReserveMap.put(itemCode,reserveCount);
         lock.unlock();
@@ -161,6 +161,7 @@ public class KiwoomAccount {
      */
     public void parseAccountInfoText(String accountNumber , String accountInfoText){
         lock.lock();
+        this.accountNumber = accountNumber;
         this.codeKiwoomItemMap.clear();
         this.codeReserveMap.clear();
 
@@ -177,6 +178,11 @@ public class KiwoomAccount {
 
         String[] itemInfoAllTextArr = itemInfoAllText.split("\n", -1);
         for (String itemInfoText : itemInfoAllTextArr) {
+
+            if(itemInfoText.length() < 1){
+                continue;
+            }
+
             KiwoomItem kiwoomItem = new KiwoomItem();
             String itemCode = "";
             int itemCount = 0;

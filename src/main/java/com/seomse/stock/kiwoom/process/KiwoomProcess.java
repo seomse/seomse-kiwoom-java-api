@@ -19,6 +19,7 @@ import com.seomse.commons.utils.ExceptionUtil;
 import com.seomse.commons.utils.FileUtil;
 import com.seomse.commons.utils.date.DateUtil;
 import com.seomse.stock.kiwoom.api.KiwoomApiSender;
+import com.seomse.stock.kiwoom.config.KiwoomConfig;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -44,13 +45,9 @@ public class KiwoomProcess {
      * CONFIG 설정
      */
     static {
-        String fileContents = FileUtil.getFileContents(new File("config/kiwoom_config"), "UTF-8");
-        fileContents = fileContents.replace("\\\\","\\");
-        fileContents = fileContents.replace("\\","\\\\");
-        JSONObject jsonObject = new JSONObject(fileContents);
-        apiProcessName = jsonObject.getString("process_name") ;
-        apiProcessPath = jsonObject.getString("process_file_path") ;
-        apiVersionUpPath = jsonObject.getString("version_up_file_path") ;
+        apiProcessName = KiwoomConfig.getConfig(KiwoomConfig.PROCESS_NAME);
+        apiProcessPath = KiwoomConfig.getConfig(KiwoomConfig.PROCESS_FILE_PATH);
+        apiVersionUpPath = KiwoomConfig.getConfig(KiwoomConfig.VERSION_UP_FILE_PATH);
     }
 
     /**
