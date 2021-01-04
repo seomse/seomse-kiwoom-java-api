@@ -99,6 +99,13 @@ public class KiwoomDateAllCrawler {
         for (String code : codeList) {
             new KiwoomDateCreditCrawler().updateSingle(code);
         }
+
+        codeList = JdbcQuery.getStringList("SELECT ETF_CD FROM T_STOCK_ETF WHERE DELISTING_DT IS NULL");
+
+        for (String code : codeList) {
+            new KiwoomDateETFStrengthCrawler().updateSingle(code);
+        }
+
     }
 
 

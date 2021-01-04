@@ -117,6 +117,8 @@ public class KiwoomApiSender {
         int maxTryCount = (int)(MAX_WAIT_SECONDS * 100);
 
         int tryCount = 0;
+        int maxRerunCount = 2;
+        int rerunCount = 0;
         while(true){
             try {
                 Thread.sleep(10L);
@@ -131,6 +133,12 @@ public class KiwoomApiSender {
             if(++tryCount > maxTryCount) {
                 logger.error("maxTryCount:"+maxTryCount + ", tryCount:"+tryCount);
                 KiwoomProcess.rerunKiwoomApi();
+                rerunCount++;
+
+                if(rerunCount > maxRerunCount){
+                    return null;
+                }
+
                 kiwoomClient = KiwoomClientManager.getInstance().getClient();
                 request = kiwoomClient.getRequest();
 

@@ -20,22 +20,21 @@ package com.seomse.stock.kiwoom.crawl.no;
 import com.seomse.jdbc.annotation.PrimaryKey;
 import com.seomse.jdbc.annotation.Table;
 
-
-@Table(name="T_STOCK_ITEM_DAILY")
-public class KiwoomCrawlDailyStrengthNo {
+@Table(name="T_STOCK_ETF_DAILY")
+public class KiwoomCrawlDailyETFStrengthNo {
     @PrimaryKey(seq = 1)
-    private String ITEM_CD;
+    private String ETF_CD;
     @PrimaryKey(seq = 2)
     private String YMD;
 
     private Double STRENGTH_RT;
 
-    public String getITEM_CD() {
-        return ITEM_CD;
+    public String getETF_CD() {
+        return ETF_CD;
     }
 
-    public void setITEM_CD(String ITEM_CD) {
-        this.ITEM_CD = ITEM_CD;
+    public void setETF_CD(String ETF_CD) {
+        this.ETF_CD = ETF_CD;
     }
 
     public String getYMD() {
