@@ -69,6 +69,9 @@ public class KiwoomApiSender {
         KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.CALL_TR,KiwoomApiCode.DAILY_STOCK_CREDIT,callbackId),
                 KiwoomApiUtil.makeDataParam(itemCode,date,"1"),callbackId);
         apiLock.unlock();
+        if(apiResult== null){
+            return null;
+        }
         return apiResult.getCallbackData();
 
     }
@@ -85,6 +88,9 @@ public class KiwoomApiSender {
         KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.CALL_TR,KiwoomApiCode.DAILY_STRENGTH_INFO,callbackId),
                 KiwoomApiUtil.makeDataParam(itemCode,continueCode+""),callbackId,true);
         apiLock.unlock();
+        if(apiResult== null){
+            return null;
+        }
         return apiResult;
 
     }
