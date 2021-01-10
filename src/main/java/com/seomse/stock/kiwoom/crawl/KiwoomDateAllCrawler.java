@@ -90,17 +90,17 @@ public class KiwoomDateAllCrawler {
      * 신용/체결강도 정보를 수집 한다.
      */
     public void updateItem(){
-        List<String> codeList = JdbcQuery.getStringList("SELECT ITEM_CD FROM T_STOCK_ITEM WHERE DELISTING_DT IS NULL");
+//        List<String> codeList = JdbcQuery.getStringList("SELECT ITEM_CD FROM T_STOCK_ITEM WHERE DELISTING_DT IS NULL");
+//
+//        for (String code : codeList) {
+//            new KiwoomDateStrengthCrawler().updateSingle(code);
+//        }
+//
+//        for (String code : codeList) {
+//            new KiwoomDateCreditCrawler().updateSingle(code);
+//        }
 
-        for (String code : codeList) {
-            new KiwoomDateStrengthCrawler().updateSingle(code);
-        }
-
-        for (String code : codeList) {
-            new KiwoomDateCreditCrawler().updateSingle(code);
-        }
-
-        codeList = JdbcQuery.getStringList("SELECT ETF_CD FROM T_STOCK_ETF WHERE DELISTING_DT IS NULL");
+        List<String> codeList = JdbcQuery.getStringList("SELECT ETF_CD FROM T_STOCK_ETF WHERE DELISTING_DT IS NULL");
 
         for (String code : codeList) {
             new KiwoomDateETFStrengthCrawler().updateSingle(code);

@@ -98,60 +98,6 @@ public class KiwoomApiSender {
     private KiwoomApiCallbackData apiSend(String code , String data , String callbackId) {
         return apiSend(code,data,callbackId,false);
     }
-    /**
-     * API 를 전송하고 데이터를 얻는다.
-     * @param code API 코드
-     * @param data API 데이터
-     * @param callbackId 콜백ID
-     * @return
-     */
-    private KiwoomApiCallbackData apiSend(String code , String data , String callbackId , boolean hasContinueData) {
-
-        KiwoomApiCallbackStore.getInstance().putCallbackId(callbackId);
-        KiwoomClient kiwoomClient = KiwoomClientManager.getInstance().getClient();
-        ApiRequest request = kiwoomClient.getRequest();
-        logger.debug("apiSend:"+code + " ["+data+"] ["+callbackId+"] ["+hasContinueData+"] ");
-        request.sendMessage(code,data);
-
-        // 0.01초 마다 재시도를 하기 때문에 100을 곱해줌
-        int maxTryCount = (int)(MAX_WAIT_SECONDS * 100);
-
-        int tryCount = 0;
-        int maxRerunCount = 2;
-        int rerunCount = 0;
-        while(true){
-            try {
-                Thread.sleep(10L);
-                KiwoomApiCallbackData callbackData = KiwoomApiCallbackStore.getInstance().getCallbackData(callbackId);
-                if(callbackData != null){
-                    return callbackData;
-                }
-            } catch (InterruptedException e) {
-                logger.error(ExceptionUtil.getStackTrace(e));
-            }
-            // 설정시간 초과시 키움 API 종료후 재시도.
-            if(++tryCount > maxTryCount) {
-                logger.error("maxTryCount:"+maxTryCount + ", tryCount:"+tryCount);
-                KiwoomProcess.rerunKiwoomApi();
-                rerunCount++;
-
-                if(rerunCount > maxRerunCount){
-                    return null;
-                }
-
-                kiwoomClient = KiwoomClientManager.getInstance().getClient();
-                request = kiwoomClient.getRequest();
-
-                if(hasContinueData){
-                    return null;
-                }
-
-                request.sendMessage(code,data);
-                tryCount = 0;
-            }
-        }
-    }
-
 
     /**
      * 주문 실행
@@ -224,13 +170,68 @@ public class KiwoomApiSender {
      * @return 현재가 / 거래량 / 체결시간 / 시가 / 고가 / 저가 / 그외 나머지 데이터 빈값
      *         숫자앞 +/- 기호 => 상승/하락의 표기뿐, 지워서 숫자값만 사용 해야 함
      */
-    public KiwoomApiCallbackData getMinuteData(String itemCode , int minuteType , int chartType ){
+    public KiwoomApiCallbackData getMinuteData(String itemCode , int minuteType , int chartType , int continueCode ){
         apiLock.lock();
         String callbackId = (callbackNumber++) + "";
         KiwoomApiCallbackData apiResult = apiSend(KiwoomApiUtil.makeCodeParam(KiwoomApiCallCode.CALL_TR,KiwoomApiCode.MINUTE_CHART_DATA,callbackId),
-                KiwoomApiUtil.makeDataParam(itemCode,minuteType+"",chartType+""),callbackId,true);
+                KiwoomApiUtil.makeDataParam(itemCode,minuteType+"",chartType+"",continueCode+""),callbackId,true);
         apiLock.unlock();
         return apiResult;
+    }
+
+
+    /**
+     * API 를 전송하고 데이터를 얻는다.
+     * @param code API 코드
+     * @param data API 데이터
+     * @param callbackId 콜백ID
+     * @return
+     */
+    private KiwoomApiCallbackData apiSend(String code , String data , String callbackId , boolean hasContinueData) {
+
+        KiwoomApiCallbackStore.getInstance().putCallbackId(callbackId);
+        KiwoomClient kiwoomClient = KiwoomClientManager.getInstance().getClient();
+        ApiRequest request = kiwoomClient.getRequest();
+        logger.debug("apiSend:"+code + " ["+data+"] ["+callbackId+"] ["+hasContinueData+"] ");
+        request.sendMessage(code,data);
+
+        // 0.01초 마다 재시도를 하기 때문에 100을 곱해줌
+        int maxTryCount = (int)(MAX_WAIT_SECONDS * 100);
+
+        int tryCount = 0;
+        int maxRerunCount = 2;
+        int rerunCount = 0;
+        while(true){
+            try {
+                Thread.sleep(10L);
+                KiwoomApiCallbackData callbackData = KiwoomApiCallbackStore.getInstance().getCallbackData(callbackId);
+                if(callbackData != null){
+                    return callbackData;
+                }
+            } catch (InterruptedException e) {
+                logger.error(ExceptionUtil.getStackTrace(e));
+            }
+            // 설정시간 초과시 키움 API 종료후 재시도.
+            if(++tryCount > maxTryCount) {
+                logger.error("maxTryCount:"+maxTryCount + ", tryCount:"+tryCount);
+                KiwoomProcess.rerunKiwoomApi();
+                rerunCount++;
+
+                if(rerunCount > maxRerunCount){
+                    return null;
+                }
+
+                kiwoomClient = KiwoomClientManager.getInstance().getClient();
+                request = kiwoomClient.getRequest();
+
+                if(hasContinueData){
+                    return null;
+                }
+
+                request.sendMessage(code,data);
+                tryCount = 0;
+            }
+        }
     }
 
     public static void main(String [] args){
@@ -292,8 +293,8 @@ public class KiwoomApiSender {
 
         try {Thread.sleep(10000L);} catch (InterruptedException e) {}
 
-        kiwoomApiCallbackData = KiwoomApiSender.getInstance().sendMarketPriceOrder("048550", "4550089011", "1", 1);
-
+//        kiwoomApiCallbackData = KiwoomApiSender.getInstance().sendMarketPriceOrder("048550", "4550089011", "1", 1);
+        kiwoomApiCallbackData = KiwoomApiSender.getInstance().getMinuteData("252670",1,0,1);
         System.out.println("[2] "+kiwoomApiCallbackData.getCallbackCode() + " : " + kiwoomApiCallbackData.getCallbackData());
 
 //        KiwoomApiCallbackData accountDetail = KiwoomApiSender.getInstance().getAccountItemDetail("4550089011");
