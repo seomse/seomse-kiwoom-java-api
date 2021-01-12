@@ -50,7 +50,7 @@ public class KiwoomDateAllCrawler {
             int nowTime = Integer.parseInt(DateUtil.getDateYmd(System.currentTimeMillis(),"HH"));
             String nowDate = DateUtil.getDateYmd(System.currentTimeMillis(),"yyyy-MM-dd");
             logger.debug("nowTime:"+nowTime+"");
-            if(nowTime <= 24) {
+            if(nowTime <= 6) {
 
 
                 KiwoomApiStart apiServer = new KiwoomApiStart(receivePort,sendPort);
