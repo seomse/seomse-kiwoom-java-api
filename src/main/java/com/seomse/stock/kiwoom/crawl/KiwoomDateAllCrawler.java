@@ -104,6 +104,7 @@ public class KiwoomDateAllCrawler {
 
         for (String code : codeList) {
             new KiwoomDateETFStrengthCrawler().updateSingle(code);
+//            break;
         }
 
     }

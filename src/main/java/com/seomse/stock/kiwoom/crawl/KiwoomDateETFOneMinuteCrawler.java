@@ -42,7 +42,7 @@ public class KiwoomDateETFOneMinuteCrawler {
     private static final Logger logger = getLogger(KiwoomDateETFOneMinuteCrawler.class);
 
     private static final String DATE_YMD = "yyyyMMddHHmm";
-    private static final String CRAWL_TYPE = "ETF_ONE_MINUTE";
+    private static final String CRAWL_TYPE = "ETF_1M";
     private static final String DATA_SEPARATOR = "\\|";
     private static final Long CRAWL_SLEEP_TIME = 2000L;
 
@@ -90,13 +90,15 @@ public class KiwoomDateETFOneMinuteCrawler {
      */
     public void updateSingle(String itemCode ){
 
-        String timeCode = "D";
+        String timeCode = "1M";
         /* 종목의 현재 수집 상태값 얻기 */
         KiwoomCrawlStatusNo statusNo = JdbcNaming.getObj(KiwoomCrawlStatusNo.class,"ITEM_CD='"+itemCode+"' AND TIME_CD='"+timeCode+"' AND CRAWL_TP='"+ CRAWL_TYPE +"'");
         if(statusNo == null){
             statusNo = new KiwoomCrawlStatusNo();
             statusNo.setITEM_CD(itemCode);
             statusNo.setTIME_CD(timeCode);
+            statusNo.setYMD_FIRST( statusNo.getYMD_FIRST() + "0000" );
+            statusNo.setYMD_LAST( statusNo.getYMD_LAST()   + "0000" );
             statusNo.setCRAWL_TP(CRAWL_TYPE);
         }
         logger.debug("""
@@ -141,9 +143,25 @@ public class KiwoomDateETFOneMinuteCrawler {
                 return o2Time.compareTo(o1Time);
             });
 
-            for (KiwoomCrawlDailyETFOneMinuteNo chartNo : allInsertChartNoList) {
-                JdbcNaming.insertOrUpdate(chartNo,false);
+            int chartSize = allInsertChartNoList.size();
+            for (int i = 0; i < chartSize; i++) {
+                KiwoomCrawlDailyETFOneMinuteNo nowNo = allInsertChartNoList.get(i);
+                KiwoomCrawlDailyETFOneMinuteNo preNo = null;
+                if(i+1 != chartSize){
+                    preNo = allInsertChartNoList.get(i+1);
+                    nowNo.setPREVIOUS_PRC( preNo.getCLOSE_PRC() );
+                } else {
+                    if(statusNo.getLAST_PRC() != null){
+                        nowNo.setPREVIOUS_PRC( statusNo.getLAST_PRC() );
+                    }
+                }
             }
+
+//            for (KiwoomCrawlDailyETFOneMinuteNo chartNo : allInsertChartNoList) {
+//                JdbcNaming.insertOrUpdate(chartNo,false);
+//            }
+
+            JdbcNaming.insert(allInsertChartNoList);
             insertOrUpdateStatusNo(allInsertChartNoList,statusNo);
             logger.debug("""
                 ITEM CODE [%s] END! COUNT [%d] UPDATE DATE [%s]
@@ -218,7 +236,7 @@ public class KiwoomDateETFOneMinuteCrawler {
 
         CrawlResponse response = new CrawlResponse(false,"","");
 
-        KiwoomApiCallbackData callbackData = KiwoomApiSender.getInstance().getDateStrengthData(itemCode, continueCode);
+        KiwoomApiCallbackData callbackData = KiwoomApiSender.getInstance().getMinuteData(itemCode,1,0,continueCode);
         if(callbackData == null){
             response.setExceptionResult(true);
             return response;
@@ -240,8 +258,24 @@ public class KiwoomDateETFOneMinuteCrawler {
         for (int i = 0; i < etfOneMinuteDataArr.length; i++) {
             String etfOneMinuteData = etfOneMinuteDataArr[i];
 
-            KiwoomCrawlDailyETFOneMinuteNo chartNo = new KiwoomCrawlDailyETFOneMinuteNo();
+            String [] etfOneMinuteArr = etfOneMinuteData.split(DATA_SEPARATOR);
 
+            int closePrice = Integer.parseInt(etfOneMinuteArr[0].substring(1));
+            long tradeVolume = Long.parseLong(etfOneMinuteArr[1]);
+            String date = etfOneMinuteArr[2].substring(0,12);
+            int openPrice = Integer.parseInt(etfOneMinuteArr[3].substring(1));
+            int highPrice = Integer.parseInt(etfOneMinuteArr[4].substring(1));
+            int lowPrice = Integer.parseInt(etfOneMinuteArr[5].substring(1));
+
+
+            KiwoomCrawlDailyETFOneMinuteNo chartNo = new KiwoomCrawlDailyETFOneMinuteNo();
+            chartNo.setETF_CD(itemCode);
+            chartNo.setYMDHM(date);
+            chartNo.setCLOSE_PRC(closePrice);
+            chartNo.setHIGH_PRC(highPrice);
+            chartNo.setLOW_PRC(lowPrice);
+            chartNo.setOPEN_PRC(openPrice);
+            chartNo.setTRADE_VOL(tradeVolume);
             chartNoList.add(chartNo);
         }
 
@@ -264,25 +298,8 @@ public class KiwoomDateETFOneMinuteCrawler {
 
     public static void main(String [] args){
 
-        String fileContents = FileUtil.getFileContents(new File("config/kiwoom_config"), "UTF-8");
-        fileContents = fileContents.replace("\\\\","\\");
-        fileContents = fileContents.replace("\\","\\\\");
-        JSONObject jsonObject = new JSONObject(fileContents);
-        int receivePort = jsonObject.getInt("api_receive_port") ;
-        int sendPort = jsonObject.getInt("api_send_port") ;
-
-
-        KiwoomProcessMonitorService monitorService = new KiwoomProcessMonitorService();
-        monitorService.setSleepTime(60000L);
-        monitorService.setState(Service.State.START);
-        monitorService.start();
-
-        KiwoomApiStart apiServer = new KiwoomApiStart(receivePort,sendPort);
+        KiwoomApiStart apiServer = new KiwoomApiStart(33333,33334);
         apiServer.start();
-
-        KiwoomProcess.rerunKiwoomApi();
-
-
         new Thread(() -> {
             try {
                 Thread.sleep(10000L);
@@ -290,31 +307,32 @@ public class KiwoomDateETFOneMinuteCrawler {
                 logger.error(ExceptionUtil.getStackTrace(e));
             }
 
-            logger.info("item trade CREDIT start");
-            List<String> codeList = JdbcQuery.getStringList("SELECT ITEM_CD FROM T_STOCK_ITEM WHERE DELISTING_DT IS NULL ");
+            String [] etfCodeArr = {
+                    "252670",
+                    "114800",
+                    "122630",
+                    "251340",
+                    "233740",
 
-            int index = 0;
-            for(int i=0;i<codeList.size();i++){
-                String code = codeList.get(i);
-                int nowTime = Integer.parseInt( DateUtil.getDateYmd(System.currentTimeMillis(),"HH") );
-                if(nowTime >= 9 && nowTime <= 16){
-                    try {
-                        Thread.sleep(1000L);
-                    } catch (InterruptedException e) {
-                        logger.error(ExceptionUtil.getStackTrace(e));
-                    }
-                    i--;
-                    continue;
-                }
-                try {
-                    logger.debug("CREDIT code: " + code + " " + ++index + " " + codeList.size());
+                    "252710",
+                    "069500",
+                    "310970",
+                    "229200",
+                    "305720",
 
-                    new KiwoomDateETFOneMinuteCrawler().updateSingle(code);
-                }catch(Exception e){
-                    logger.error(ExceptionUtil.getStackTrace(e));
-                }
+                    "364980",
+                    "305540",
+                    "204480",
+                    "292150",
+                    "102110"
+            };
+            for (String etfCode : etfCodeArr) {
+                logger.info("ETF 1 MIN [" + etfCode+"] start");
+                new KiwoomDateETFOneMinuteCrawler().updateSingle(etfCode);
+                logger.info("ETF 1 MIN [" + etfCode+"] end");
             }
-            logger.info("item trade CREDIT complete");
+
+            logger.info("ETF 1 MIN complete");
 
         }).start();
     }

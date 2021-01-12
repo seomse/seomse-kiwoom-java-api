@@ -36,6 +36,8 @@ public class KiwoomCrawlStatusNo {
     @DateTime
     private Long UPT_DT = System.currentTimeMillis();
 
+    private Integer LAST_PRC;
+
     public String getITEM_CD() {
         return ITEM_CD;
     }
@@ -98,5 +100,13 @@ public class KiwoomCrawlStatusNo {
 
     public void setUPT_DT(Long UPT_DT) {
         this.UPT_DT = UPT_DT;
+    }
+
+    public Integer getLAST_PRC() {
+        return LAST_PRC;
+    }
+
+    public void setLAST_PRC(Integer LAST_PRC) {
+        this.LAST_PRC = LAST_PRC;
     }
 }
