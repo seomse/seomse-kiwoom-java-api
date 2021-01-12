@@ -90,21 +90,45 @@ public class KiwoomDateAllCrawler {
      * 신용/체결강도 정보를 수집 한다.
      */
     public void updateItem(){
-//        List<String> codeList = JdbcQuery.getStringList("SELECT ITEM_CD FROM T_STOCK_ITEM WHERE DELISTING_DT IS NULL");
+        List<String> codeList = JdbcQuery.getStringList("SELECT ITEM_CD FROM T_STOCK_ITEM WHERE DELISTING_DT IS NULL");
 //
-//        for (String code : codeList) {
-//            new KiwoomDateStrengthCrawler().updateSingle(code);
-//        }
+        for (String code : codeList) {
+            new KiwoomDateStrengthCrawler().updateSingle(code);
+        }
 //
-//        for (String code : codeList) {
-//            new KiwoomDateCreditCrawler().updateSingle(code);
-//        }
+        for (String code : codeList) {
+            new KiwoomDateCreditCrawler().updateSingle(code);
+        }
 
-        List<String> codeList = JdbcQuery.getStringList("SELECT ETF_CD FROM T_STOCK_ETF WHERE DELISTING_DT IS NULL");
+        codeList = JdbcQuery.getStringList("SELECT ETF_CD FROM T_STOCK_ETF WHERE DELISTING_DT IS NULL");
 
         for (String code : codeList) {
             new KiwoomDateETFStrengthCrawler().updateSingle(code);
-//            break;
+        }
+
+        String [] etfCodeArr = {
+                "252670",
+                "114800",
+                "122630",
+                "251340",
+                "233740",
+
+                "252710",
+                "069500",
+                "310970",
+                "229200",
+                "305720",
+
+                "364980",
+                "305540",
+                "204480",
+                "292150",
+                "102110"
+        };
+        for (String etfCode : etfCodeArr) {
+            logger.info("ETF 1 MIN [" + etfCode+"] start");
+            new KiwoomDateETFOneMinuteCrawler().updateSingle(etfCode);
+            logger.info("ETF 1 MIN [" + etfCode+"] end");
         }
 
     }
