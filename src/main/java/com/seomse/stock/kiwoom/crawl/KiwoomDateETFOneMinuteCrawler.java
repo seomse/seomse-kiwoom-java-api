@@ -157,11 +157,9 @@ public class KiwoomDateETFOneMinuteCrawler {
                 }
             }
 
-//            for (KiwoomCrawlDailyETFOneMinuteNo chartNo : allInsertChartNoList) {
-//                JdbcNaming.insertOrUpdate(chartNo,false);
-//            }
-
-            JdbcNaming.insert(allInsertChartNoList);
+            for (KiwoomCrawlDailyETFOneMinuteNo chartNo : allInsertChartNoList) {
+                JdbcNaming.insertOrUpdate(chartNo,false);
+            }
             insertOrUpdateStatusNo(allInsertChartNoList,statusNo);
             logger.debug("""
                 ITEM CODE [%s] END! COUNT [%d] UPDATE DATE [%s]
