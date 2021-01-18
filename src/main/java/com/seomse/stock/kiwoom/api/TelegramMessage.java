@@ -36,8 +36,8 @@ public class TelegramMessage {
     
     private static final Logger logger = getLogger(TelegramMessage.class);
 
-    private static String token = "1405493802:AAGNODKnzSyRHiN72IzaUx0GYP4UrLxmemo";
-    private static String chatId = "1417951085";
+    private static String token = "";
+    private static String chatId = "";
     static {
         token = KiwoomConfig.getConfig(KiwoomConfig.TELEGRAM_TOKEN);
         chatId = KiwoomConfig.getConfig(KiwoomConfig.TELEGRAM_CHAT_ID);
