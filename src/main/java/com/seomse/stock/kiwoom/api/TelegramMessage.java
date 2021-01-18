@@ -85,6 +85,16 @@ public class TelegramMessage {
         }
     }
 
+    /**
+     * 주식 메세지를 자기 텔레그램 API 로 보낸다.
+     * @param itemName 종목명
+     * @param price 가격
+     * @param volume 수량
+     * @param depositNum     계좌번호
+     * @param depositVolume 계좌잔고
+     * @param isSell 판매여부
+     * @return
+     */
     public static String toStockMessageToMe(String itemName , int price , int volume , String depositNum , int depositVolume , boolean isSell){
         NumberFormat nf = NumberFormat.getNumberInstance(Locale.KOREA);
         String priceStr = nf.format(price);
@@ -98,6 +108,7 @@ public class TelegramMessage {
 
 
     public static void main(String [] args){
+
         toStockMessageToMe("삼성전자",1230300,100,"101-32-13131",823981293,true);
     }
 }
